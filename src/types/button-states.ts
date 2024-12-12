@@ -3,3 +3,9 @@ export enum ButtonState {
     PROGRESS = 'progress',
     COMPLETED = 'completed'
 }
+
+export enum MintButtonState {
+    DEFAULT = 'default',
+    MINTING = 'minting',
+    MINTED = 'minted'
+}

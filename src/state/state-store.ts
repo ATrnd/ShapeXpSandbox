@@ -1,5 +1,5 @@
 // src/state/state-store.ts
-import { ButtonState } from '../types/button-states';
+import { ButtonState, MintButtonState} from '../types/button-states';
 
 export class AppState {
     private static instance: AppState;
@@ -12,6 +12,8 @@ export class AppState {
     private readonly connectedButtonClasses = 'w-[280px] h-[41px] border-2 rounded-lg uppercase text-base text-white transition-all duration-300 ease-in-out border-[#AAFF72] opacity-50 cursor-not-allowed';
     private readonly progressButtonClasses = 'w-[280px] h-[41px] border-2 border-[#FF7272] rounded-lg uppercase text-base transition-all duration-300 ease-in-out opacity-75';
     private readonly mintedButtonClasses = 'w-[280px] h-[41px] border-2 rounded-lg uppercase text-base text-white transition-all duration-300 ease-in-out border-[#AAFF72] opacity-50 cursor-not-allowed';
+    private readonly mintButtonBaseClasses = 'w-[280px] h-[41px] border-2 border-[#FF7272] rounded-lg uppercase text-base transition-all duration-300 ease-in-out hover:border-orange-600 hover:scale-105';
+    private readonly mintingButtonClasses = 'w-[280px] h-[41px] border-2 border-[#FF7272] rounded-lg uppercase text-base transition-all duration-300 ease-in-out opacity-75';
 
     // Buttons that require connection
     private readonly MINT_BUTTON_ID = 'ShapeXpSandboxMint';
@@ -80,48 +82,48 @@ export class AppState {
         }
     }
 
-    private updateButtonStates() {
-        const mintButton = document.getElementById(this.MINT_BUTTON_ID);
-
-        if (this.isConnected) {
-            if (this.hasNFT) {
-                // If has NFT, enable NFT-dependent buttons and disable mint
-                if (mintButton) {
-                    mintButton.className = this.mintedButtonClasses;
-                    mintButton.setAttribute('disabled', 'true');
-                }
-                this.nftDependentButtons.forEach(buttonId => {
-                    const button = document.getElementById(buttonId);
-                    if (button) {
-                        button.className = this.buttonBaseClasses;
-                        button.removeAttribute('disabled');
-                    }
-                });
-            } else {
-                // If no NFT, enable only mint button
-                if (mintButton) {
-                    mintButton.className = this.buttonBaseClasses;
-                    mintButton.removeAttribute('disabled');
-                }
-                this.nftDependentButtons.forEach(buttonId => {
-                    const button = document.getElementById(buttonId);
-                    if (button) {
-                        button.className = `${this.buttonBaseClasses} disabled:opacity-50 disabled:cursor-not-allowed`;
-                        button.setAttribute('disabled', 'true');
-                    }
-                });
-            }
-        } else {
-            // If not connected, disable all buttons
-            [...this.nftDependentButtons, this.MINT_BUTTON_ID].forEach(buttonId => {
-                const button = document.getElementById(buttonId);
-                if (button) {
-                    button.className = `${this.buttonBaseClasses} disabled:opacity-50 disabled:cursor-not-allowed`;
-                    button.setAttribute('disabled', 'true');
-                }
-            });
-        }
-    }
+//     private updateButtonStates() {
+//         const mintButton = document.getElementById(this.MINT_BUTTON_ID);
+//
+//         if (this.isConnected) {
+//             if (this.hasNFT) {
+//                 // If has NFT, enable NFT-dependent buttons and disable mint
+//                 if (mintButton) {
+//                     mintButton.className = this.mintedButtonClasses;
+//                     mintButton.setAttribute('disabled', 'true');
+//                 }
+//                 this.nftDependentButtons.forEach(buttonId => {
+//                     const button = document.getElementById(buttonId);
+//                     if (button) {
+//                         button.className = this.buttonBaseClasses;
+//                         button.removeAttribute('disabled');
+//                     }
+//                 });
+//             } else {
+//                 // If no NFT, enable only mint button
+//                 if (mintButton) {
+//                     mintButton.className = this.buttonBaseClasses;
+//                     mintButton.removeAttribute('disabled');
+//                 }
+//                 this.nftDependentButtons.forEach(buttonId => {
+//                     const button = document.getElementById(buttonId);
+//                     if (button) {
+//                         button.className = `${this.buttonBaseClasses} disabled:opacity-50 disabled:cursor-not-allowed`;
+//                         button.setAttribute('disabled', 'true');
+//                     }
+//                 });
+//             }
+//         } else {
+//             // If not connected, disable all buttons
+//             [...this.nftDependentButtons, this.MINT_BUTTON_ID].forEach(buttonId => {
+//                 const button = document.getElementById(buttonId);
+//                 if (button) {
+//                     button.className = `${this.buttonBaseClasses} disabled:opacity-50 disabled:cursor-not-allowed`;
+//                     button.setAttribute('disabled', 'true');
+//                 }
+//             });
+//         }
+//     }
 
     private initializeButtonStates() {
         // Set initial states for restricted buttons
@@ -187,6 +189,36 @@ export class AppState {
                 button.textContent = 'Connected';
                 button.className = this.connectedButtonClasses;
                 button.setAttribute('disabled', 'true');
+                if (loadingIndicator) loadingIndicator.classList.add('hidden');
+                break;
+        }
+    }
+
+    public updateMintButtonState(state: MintButtonState) {
+        const mintButton = document.getElementById('ShapeXpSandboxMint');
+        if (!mintButton) return;
+
+        const loadingIndicator = mintButton.nextElementSibling as HTMLElement;
+
+        switch (state) {
+            case MintButtonState.DEFAULT:
+                mintButton.textContent = 'Mint ShapeXp';
+                mintButton.className = this.mintButtonBaseClasses;
+                mintButton.removeAttribute('disabled');
+                if (loadingIndicator) loadingIndicator.classList.add('hidden');
+                break;
+
+            case MintButtonState.MINTING:
+                mintButton.textContent = 'Minting...';
+                mintButton.className = this.mintingButtonClasses;
+                mintButton.setAttribute('disabled', 'true');
+                if (loadingIndicator) loadingIndicator.classList.remove('hidden');
+                break;
+
+            case MintButtonState.MINTED:
+                mintButton.textContent = 'Minted';
+                mintButton.className = this.mintedButtonClasses;
+                mintButton.setAttribute('disabled', 'true');
                 if (loadingIndicator) loadingIndicator.classList.add('hidden');
                 break;
         }

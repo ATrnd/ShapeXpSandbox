@@ -12,10 +12,36 @@ export class WalletConnection {
         console.log('-----------------------------');
         this.appState = AppState.getInstance();
         this.shapeXpManager = new ShapeXpManager();
-        this.initializeConnection();
-        this.checkExistingConnection();
-        this.setupEventListeners();
-        this.setupDisabledClickHandler();
+
+        this.initializeState().then(() => {
+            this.initializeConnection();
+            this.setupEventListeners();
+            this.setupDisabledClickHandler();
+        });
+        // this.initializeConnection();
+        // this.checkExistingConnection();
+        // this.setupEventListeners();
+        // this.setupDisabledClickHandler();
+    }
+
+    private async initializeState() {
+        if (!window.ethereum?.request) return;
+
+        try {
+            const accounts = await window.ethereum.request({
+                method: 'eth_accounts'
+            }) as string[];
+
+            if (accounts.length > 0) {
+                this.appState.updateConnection(true, accounts[0]);
+                await this.shapeXpManager.checkShapeXpOwnership();
+                console.log('Initial state restored: Connected with account', accounts[0]);
+            } else {
+                console.log('No connected account found on load');
+            }
+        } catch (error) {
+            console.error('Error checking initial state:', error);
+        }
     }
 
     private setupDisabledClickHandler() {
