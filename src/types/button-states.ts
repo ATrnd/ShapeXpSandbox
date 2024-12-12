@@ -9,8 +9,8 @@ export enum ButtonState {
     MINTED = 'minted',
 
     // Experience-specific States
-    GAINING = 'gaining',
-    GAINED = 'gained'
+    GAINING = 'adding',
+    GAINED = 'added'
 }
 
 export enum ExperienceAmount {

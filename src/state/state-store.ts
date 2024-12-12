@@ -5,10 +5,11 @@ import { ButtonState } from '../types/button-states';
 import { ButtonClasses } from './button-classes';
 
 interface ButtonConfig {
-    id: string;
+    id?: string;
     states: {
         [key in ButtonState]?: {
-            text: string;
+            text?: string;
+            dynamicText?: (type: string) => string;
             classes: string[];
         };
     };
@@ -56,13 +57,29 @@ export class AppState {
                     classes: [ButtonClasses.minted, ButtonClasses.disabled]
                 }
             }
-        }
+        },
+        experience: {
+            states: {
+                [ButtonState.DEFAULT]: {
+                    dynamicText: (type: string) => `Gain ShapeXp (${type})`,
+                    classes: [ButtonClasses.default]
+                },
+                [ButtonState.GAINING]: {
+                    text: 'Adding ShapeXp...',
+                    classes: [ButtonClasses.progress]
+                },
+                [ButtonState.GAINED]: {
+                    text: 'ShapeXp Added!',
+                    classes: [ButtonClasses.gained, ButtonClasses.disabled]
+                }
+            }
+    }
     };
 
     // Unified button state update method
     public updateButtonState(buttonType: string, state: ButtonState) {
         const config = this.buttonConfigs[buttonType];
-        if (!config) return;
+        if (!config || !config.id) return;
 
         const button = document.getElementById(config.id);
         if (!button) return;
@@ -71,7 +88,15 @@ export class AppState {
         const stateConfig = config.states[state];
 
         if (stateConfig) {
-            button.textContent = stateConfig.text;
+            // Handle both static and dynamic text
+            if (stateConfig.text) {
+                button.textContent = stateConfig.text;
+            } else if (stateConfig.dynamicText && buttonType === 'experience') {
+                const buttonId = button.id;
+                const type = buttonId.includes('Low') ? 'Low' : buttonId.includes('Mid') ? 'Mid' : 'High';
+                button.textContent = stateConfig.dynamicText(type);
+            }
+
             button.className = ButtonClasses.combine(...stateConfig.classes);
 
             if (state === ButtonState.PROGRESS) {
@@ -258,20 +283,20 @@ export class AppState {
 
         switch (state) {
             case ButtonState.DEFAULT:
-                button.textContent = `Gain ShapeXp ${buttonType}`;
-                button.className = ButtonClasses.combine(ButtonClasses.default);
+                button.textContent = `Gain ShapeXp (${buttonType})`;
+                button.className = ButtonClasses.getDefaultClasses();
                 if (loadingIndicator) loadingIndicator.classList.add('hidden');
                 break;
 
             case ButtonState.GAINING:
-                button.textContent = 'Gaining ShapeXp...';
-                button.className = ButtonClasses.combine(ButtonClasses.progress);
+                button.textContent = 'Adding ShapeXp...';
+                button.className = ButtonClasses.getProgressClasses();
                 if (loadingIndicator) loadingIndicator.classList.remove('hidden');
                 break;
 
             case ButtonState.GAINED:
                 button.textContent = 'ShapeXp Added!';
-                button.className = ButtonClasses.combine(ButtonClasses.gained);
+                button.className = ButtonClasses.getDefaultClasses();  // Using default classes instead of special gained classes
                 if (loadingIndicator) loadingIndicator.classList.add('hidden');
                 break;
         }
@@ -300,6 +325,13 @@ export class AppState {
     public updateExperience(experience: bigint, formattedExperience: string) {
         this.experience = experience;
         this.formattedExperience = formattedExperience;
+
+        // Add this: Update display when experience changes
+        const expElement = document.querySelector('.aux-mono.text-white li:first-child');
+        if (expElement) {
+            expElement.textContent = `shapexp: ${formattedExperience}`;
+        }
+
         console.log('Experience updated:', {
             raw: experience.toString(),
             formatted: formattedExperience

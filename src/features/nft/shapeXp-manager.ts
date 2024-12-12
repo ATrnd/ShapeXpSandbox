@@ -2,6 +2,7 @@ import { AppState } from '../../state/state-store';
 import { checkShapeXpNFTOwnership } from './validation';
 import { getShapeXpNFTContract } from '../../contracts/contract-instances';
 import { ButtonState } from '../../types/button-states';
+import { getGlobalExperience } from '../experience/experience-tracking';
 
 export class ShapeXpManager {
     private appState: AppState;
@@ -75,9 +76,22 @@ export class ShapeXpManager {
         try {
             const hasNFT = await checkShapeXpNFTOwnership();
             this.appState.updateNFTStatus(hasNFT);
+
+            if (hasNFT) {
+                const { experience, formattedExperience } = await getGlobalExperience();
+                this.appState.updateExperience(experience, formattedExperience);
+                this.updateExperienceDisplay(formattedExperience);
+            }
         } catch (error) {
             console.error('Error in NFT check:', error);
             this.appState.updateNFTStatus(false);
+        }
+    }
+
+    private updateExperienceDisplay(amount: string) {
+        const expElement = document.querySelector('.aux-mono.text-white li:first-child');
+        if (expElement) {
+            expElement.textContent = `shapexp: ${amount}`;
         }
     }
 }

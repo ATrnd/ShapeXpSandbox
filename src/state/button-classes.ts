@@ -24,6 +24,6 @@ export const ButtonClasses = {
     getProgressClasses: () => ButtonClasses.combine(ButtonClasses.progress),
     getConnectedClasses: () => ButtonClasses.combine(ButtonClasses.connected, ButtonClasses.disabled),
     getMintedClasses: () => ButtonClasses.combine(ButtonClasses.minted, ButtonClasses.disabled),
-    getGainedClasses: () => ButtonClasses.combine(ButtonClasses.gained, ButtonClasses.disabled),
+    // getGainedClasses: () => ButtonClasses.combine(ButtonClasses.gained, ButtonClasses.disabled),
     getDisabledClasses: () => ButtonClasses.combine(ButtonClasses.defaultWithDisabled),
 };
