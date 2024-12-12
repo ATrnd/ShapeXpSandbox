@@ -1,11 +1,20 @@
 export enum ButtonState {
+    // Generic States
     DEFAULT = 'default',
     PROGRESS = 'progress',
-    COMPLETED = 'completed'
+    COMPLETED = 'completed',
+
+    // Mint-specific States
+    MINTING = 'minting',
+    MINTED = 'minted',
+
+    // Experience-specific States
+    GAINING = 'gaining',
+    GAINED = 'gained'
 }
 
-export enum MintButtonState {
-    DEFAULT = 'default',
-    MINTING = 'minting',
-    MINTED = 'minted'
+export enum ExperienceAmount {
+    LOW,
+    MID,
+    HIGH
 }

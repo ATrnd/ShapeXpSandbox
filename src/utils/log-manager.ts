@@ -11,8 +11,6 @@ export class LogManager {
         this.logInfo = document.getElementById(LOGS.ELEMENTS.INFO);
         this.logLoading = document.getElementById(LOGS.ELEMENTS.LOADING);
         this.logWrap = document.getElementById(LOGS.ELEMENTS.WRAP);
-        this.logInfo = document.getElementById(LOGS.ELEMENTS.INFO);
-        this.logLoading = document.getElementById(LOGS.ELEMENTS.LOADING);
     }
 
     public static getInstance(): LogManager {

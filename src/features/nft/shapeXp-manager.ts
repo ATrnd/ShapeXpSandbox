@@ -1,7 +1,7 @@
 import { AppState } from '../../state/state-store';
 import { checkShapeXpNFTOwnership } from './validation';
 import { getShapeXpNFTContract } from '../../contracts/contract-instances';
-import { MintButtonState } from '../../types/button-states';
+import { ButtonState } from '../../types/button-states';
 
 export class ShapeXpManager {
     private appState: AppState;
@@ -12,19 +12,6 @@ export class ShapeXpManager {
         this.appState = AppState.getInstance();
         this.setupMintButtonHandler();
     }
-
-    //private setupMintButtonListener() {
-    //    const mintButton = document.getElementById(this.MINT_BUTTON_ID);
-    //    if (!mintButton) return;
-
-    //    mintButton.addEventListener('click', () => {
-    //        if (this.appState.getHasNFT()) {
-    //            console.log('owns shapeXpNFT');
-    //        } else {
-    //            console.log('has no shapeXpNFT');
-    //        }
-    //    });
-    //}
 
     private setupMintButtonHandler() {
         const mintButton = document.getElementById(this.MINT_BUTTON_ID);
@@ -45,35 +32,14 @@ export class ShapeXpManager {
                 await this.handleMint();
             } catch (error) {
                 console.error('Error in mint process:', error);
-                this.appState.updateMintButtonState(MintButtonState.DEFAULT);
+                this.appState.updateMintButtonState(ButtonState.DEFAULT);
             }
         });
     }
 
-    //private setupMintButtonListener() {
-    //    const mintButton = document.getElementById(this.MINT_BUTTON_ID);
-    //    if (!mintButton) return;
-
-    //    mintButton.addEventListener('click', async () => {
-    //        if (this.appState.getHasNFT()) return;
-
-    //        if (this.isMinting) {
-    //            console.log('Minting already in progress');
-    //            return;
-    //        }
-
-    //        try {
-    //            await this.handleMint();
-    //        } catch (error) {
-    //            console.error('Error in mint process:', error);
-    //            this.appState.updateMintButtonState(MintButtonState.DEFAULT);
-    //        }
-    //    });
-    //}
-
     private async handleMint() {
         this.isMinting = true;
-        this.appState.updateMintButtonState(MintButtonState.MINTING);
+        this.appState.updateMintButtonState(ButtonState.MINTING);
 
         try {
             console.log('Initiating mint process...');
@@ -87,9 +53,8 @@ export class ShapeXpManager {
             const receipt = await tx.wait(1);
             console.log('Transaction confirmed:', receipt);
 
-            // Update NFT status and button state
             await this.checkShapeXpOwnership();
-            this.appState.updateMintButtonState(MintButtonState.MINTED);
+            this.appState.updateMintButtonState(ButtonState.MINTED);
 
             return tx;
         } catch (error: any) {
@@ -99,22 +64,12 @@ export class ShapeXpManager {
                 data: error.data,
                 transaction: error.transaction
             });
+            this.appState.updateMintButtonState(ButtonState.DEFAULT);
             throw error;
         } finally {
             this.isMinting = false;
         }
     }
-
-    //private setupDisabledMintHandler() {
-    //    const mintButton = document.getElementById(this.MINT_BUTTON_ID);
-    //    if (!mintButton) return;
-
-    //    mintButton.addEventListener('click', () => {
-    //        if (this.appState.getHasNFT()) {
-    //            console.log('already minted, minting disabled');
-    //        }
-    //    });
-    //}
 
     public async checkShapeXpOwnership() {
         try {

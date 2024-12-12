@@ -18,10 +18,6 @@ export class WalletConnection {
             this.setupEventListeners();
             this.setupDisabledClickHandler();
         });
-        // this.initializeConnection();
-        // this.checkExistingConnection();
-        // this.setupEventListeners();
-        // this.setupDisabledClickHandler();
     }
 
     private async initializeState() {
@@ -61,33 +57,28 @@ export class WalletConnection {
 
         connectButton.addEventListener('click', async () => {
             if (this.appState.getIsConnected()) return;
+
             try {
                 if (!window.ethereum || !window.ethereum.request) {
                     throw new Error('Ethereum provider not found');
                 }
 
-                // Show loading state
                 this.appState.updateConnectButtonState(ButtonState.PROGRESS);
 
                 const accounts = await window.ethereum.request({
                     method: 'eth_requestAccounts'
                 }) as string[];
 
-                this.appState.updateConnection(true, accounts[0]);
-                console.log('Connected:', accounts[0]);
-
                 if (accounts.length > 0) {
                     this.appState.updateConnection(true, accounts[0]);
                     await this.shapeXpManager.checkShapeXpOwnership();
+                    console.log('Connected:', accounts[0]);
                 }
 
             } catch (error) {
                 console.error('Connection error:', error);
                 this.appState.updateConnection(false);
                 this.appState.updateConnectButtonState(ButtonState.DEFAULT);
-            } finally {
-                // Hide loading state
-                this.setButtonLoading(this.CONNECT_BUTTON_ID, false);
             }
         });
     }

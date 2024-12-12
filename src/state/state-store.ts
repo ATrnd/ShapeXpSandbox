@@ -1,21 +1,93 @@
 // src/state/state-store.ts
-import { ButtonState, MintButtonState} from '../types/button-states';
+// import { ButtonState, MintButtonState, ExperienceButtonState} from '../types/button-states';
+
+import { ButtonState } from '../types/button-states';
+import { ButtonClasses } from './button-classes';
+
+interface ButtonConfig {
+    id: string;
+    states: {
+        [key in ButtonState]?: {
+            text: string;
+            classes: string[];
+        };
+    };
+}
 
 export class AppState {
     private static instance: AppState;
     private isConnected: boolean = false;
     private userAddress: string | null = null;
     private hasNFT: boolean = false;
+    private experience: bigint = BigInt(0);
+    private formattedExperience: string = '0';
 
-    // button classes
-    private readonly buttonBaseClasses = 'w-[280px] h-[41px] border-2 border-[#FF7272] rounded-lg uppercase text-base transition-all duration-300 ease-in-out hover:border-orange-600 hover:scale-105';
-    private readonly connectedButtonClasses = 'w-[280px] h-[41px] border-2 rounded-lg uppercase text-base text-white transition-all duration-300 ease-in-out border-[#AAFF72] opacity-50 cursor-not-allowed';
-    private readonly progressButtonClasses = 'w-[280px] h-[41px] border-2 border-[#FF7272] rounded-lg uppercase text-base transition-all duration-300 ease-in-out opacity-75';
-    private readonly mintedButtonClasses = 'w-[280px] h-[41px] border-2 rounded-lg uppercase text-base text-white transition-all duration-300 ease-in-out border-[#AAFF72] opacity-50 cursor-not-allowed';
-    private readonly mintButtonBaseClasses = 'w-[280px] h-[41px] border-2 border-[#FF7272] rounded-lg uppercase text-base transition-all duration-300 ease-in-out hover:border-orange-600 hover:scale-105';
-    private readonly mintingButtonClasses = 'w-[280px] h-[41px] border-2 border-[#FF7272] rounded-lg uppercase text-base transition-all duration-300 ease-in-out opacity-75';
+    private readonly buttonConfigs: { [key: string]: ButtonConfig } = {
+        connect: {
+            id: 'ShapeXpSandboxConnect',
+            states: {
+                [ButtonState.DEFAULT]: {
+                    text: 'Connect',
+                    classes: [ButtonClasses.default]
+                },
+                [ButtonState.PROGRESS]: {
+                    text: 'Connecting...',
+                    classes: [ButtonClasses.progress]
+                },
+                [ButtonState.COMPLETED]: {
+                    text: 'Connected',
+                    classes: [ButtonClasses.connected, ButtonClasses.disabled]
+                }
+            }
+        },
+        mint: {
+            id: 'ShapeXpSandboxMint',
+            states: {
+                [ButtonState.DEFAULT]: {
+                    text: 'Mint ShapeXp',
+                    classes: [ButtonClasses.default]
+                },
+                [ButtonState.MINTING]: {
+                    text: 'Minting...',
+                    classes: [ButtonClasses.progress]
+                },
+                [ButtonState.MINTED]: {
+                    text: 'Minted',
+                    classes: [ButtonClasses.minted, ButtonClasses.disabled]
+                }
+            }
+        }
+    };
 
-    // Buttons that require connection
+    // Unified button state update method
+    public updateButtonState(buttonType: string, state: ButtonState) {
+        const config = this.buttonConfigs[buttonType];
+        if (!config) return;
+
+        const button = document.getElementById(config.id);
+        if (!button) return;
+
+        const loadingIndicator = button.nextElementSibling as HTMLElement;
+        const stateConfig = config.states[state];
+
+        if (stateConfig) {
+            button.textContent = stateConfig.text;
+            button.className = ButtonClasses.combine(...stateConfig.classes);
+
+            if (state === ButtonState.PROGRESS) {
+                button.setAttribute('disabled', 'true');
+                if (loadingIndicator) loadingIndicator.classList.remove('hidden');
+            } else {
+                if ([ButtonState.COMPLETED, ButtonState.MINTED, ButtonState.GAINED].includes(state)) {
+                    button.setAttribute('disabled', 'true');
+                } else {
+                    button.removeAttribute('disabled');
+                }
+                if (loadingIndicator) loadingIndicator.classList.add('hidden');
+            }
+        }
+    }
+
     private readonly MINT_BUTTON_ID = 'ShapeXpSandboxMint';
     private restrictedButtons = [
         'ShapeXpSandboxMint',
@@ -48,9 +120,8 @@ export class AppState {
         const mintButton = document.getElementById('ShapeXpSandboxMint');
 
         if (this.hasNFT) {
-            // If user has NFT, disable mint button and enable others
             if (mintButton) {
-                mintButton.className = this.connectedButtonClasses;
+                mintButton.className = ButtonClasses.getConnectedClasses();
                 mintButton.setAttribute('disabled', 'true');
             }
 
@@ -58,15 +129,14 @@ export class AppState {
                 if (buttonId !== 'ShapeXpSandboxMint') {
                     const button = document.getElementById(buttonId);
                     if (button) {
-                        button.className = this.buttonBaseClasses;
+                        button.className = ButtonClasses.getDefaultClasses();
                         button.removeAttribute('disabled');
                     }
                 }
             });
         } else {
-            // If user doesn't have NFT, enable only mint button
             if (mintButton) {
-                mintButton.className = this.buttonBaseClasses;
+                mintButton.className = ButtonClasses.getDefaultClasses();
                 mintButton.removeAttribute('disabled');
             }
 
@@ -74,7 +144,7 @@ export class AppState {
                 if (buttonId !== 'ShapeXpSandboxMint') {
                     const button = document.getElementById(buttonId);
                     if (button) {
-                        button.className = `${this.buttonBaseClasses} disabled:opacity-50 disabled:cursor-not-allowed`;
+                        button.className = ButtonClasses.getDisabledClasses();
                         button.setAttribute('disabled', 'true');
                     }
                 }
@@ -82,63 +152,18 @@ export class AppState {
         }
     }
 
-//     private updateButtonStates() {
-//         const mintButton = document.getElementById(this.MINT_BUTTON_ID);
-//
-//         if (this.isConnected) {
-//             if (this.hasNFT) {
-//                 // If has NFT, enable NFT-dependent buttons and disable mint
-//                 if (mintButton) {
-//                     mintButton.className = this.mintedButtonClasses;
-//                     mintButton.setAttribute('disabled', 'true');
-//                 }
-//                 this.nftDependentButtons.forEach(buttonId => {
-//                     const button = document.getElementById(buttonId);
-//                     if (button) {
-//                         button.className = this.buttonBaseClasses;
-//                         button.removeAttribute('disabled');
-//                     }
-//                 });
-//             } else {
-//                 // If no NFT, enable only mint button
-//                 if (mintButton) {
-//                     mintButton.className = this.buttonBaseClasses;
-//                     mintButton.removeAttribute('disabled');
-//                 }
-//                 this.nftDependentButtons.forEach(buttonId => {
-//                     const button = document.getElementById(buttonId);
-//                     if (button) {
-//                         button.className = `${this.buttonBaseClasses} disabled:opacity-50 disabled:cursor-not-allowed`;
-//                         button.setAttribute('disabled', 'true');
-//                     }
-//                 });
-//             }
-//         } else {
-//             // If not connected, disable all buttons
-//             [...this.nftDependentButtons, this.MINT_BUTTON_ID].forEach(buttonId => {
-//                 const button = document.getElementById(buttonId);
-//                 if (button) {
-//                     button.className = `${this.buttonBaseClasses} disabled:opacity-50 disabled:cursor-not-allowed`;
-//                     button.setAttribute('disabled', 'true');
-//                 }
-//             });
-//         }
-//     }
-
     private initializeButtonStates() {
-        // Set initial states for restricted buttons
         this.restrictedButtons.forEach(buttonId => {
             const button = document.getElementById(buttonId);
             if (button) {
-                button.className = 'w-[280px] h-[41px] border-2 border-[#FF7272] rounded-lg uppercase text-base disabled:opacity-50 disabled:cursor-not-allowed';
+                button.className = ButtonClasses.getDisabledClasses();
                 button.setAttribute('disabled', 'true');
             }
         });
 
-        // Initialize connect button
         const connectButton = document.getElementById('ShapeXpSandboxConnect');
         if (connectButton) {
-            connectButton.className = this.buttonBaseClasses;
+            connectButton.className = ButtonClasses.getDefaultClasses();
         }
     }
 
@@ -173,52 +198,80 @@ export class AppState {
         switch (state) {
             case ButtonState.DEFAULT:
                 button.textContent = 'Connect';
-                button.className = this.buttonBaseClasses;
-                button.removeAttribute('disabled');
-                if (loadingIndicator) loadingIndicator.classList.add('hidden');
-                break;
+            button.className = ButtonClasses.getDefaultClasses();
+            button.removeAttribute('disabled');
+            if (loadingIndicator) loadingIndicator.classList.add('hidden');
+            break;
 
             case ButtonState.PROGRESS:
                 button.textContent = 'Connecting...';
-                button.className = this.progressButtonClasses;
-                button.setAttribute('disabled', 'true');
-                if (loadingIndicator) loadingIndicator.classList.remove('hidden');
-                break;
+            button.className = ButtonClasses.getProgressClasses();
+            button.setAttribute('disabled', 'true');
+            if (loadingIndicator) loadingIndicator.classList.remove('hidden');
+            break;
 
             case ButtonState.COMPLETED:
                 button.textContent = 'Connected';
-                button.className = this.connectedButtonClasses;
-                button.setAttribute('disabled', 'true');
-                if (loadingIndicator) loadingIndicator.classList.add('hidden');
-                break;
+            button.className = ButtonClasses.getConnectedClasses();
+            button.setAttribute('disabled', 'true');
+            if (loadingIndicator) loadingIndicator.classList.add('hidden');
+            break;
         }
     }
 
-    public updateMintButtonState(state: MintButtonState) {
+    public updateMintButtonState(state: ButtonState) {
         const mintButton = document.getElementById('ShapeXpSandboxMint');
         if (!mintButton) return;
 
         const loadingIndicator = mintButton.nextElementSibling as HTMLElement;
 
         switch (state) {
-            case MintButtonState.DEFAULT:
+            case ButtonState.DEFAULT:
                 mintButton.textContent = 'Mint ShapeXp';
-                mintButton.className = this.mintButtonBaseClasses;
+                mintButton.className = ButtonClasses.getDefaultClasses();
                 mintButton.removeAttribute('disabled');
                 if (loadingIndicator) loadingIndicator.classList.add('hidden');
                 break;
 
-            case MintButtonState.MINTING:
+            case ButtonState.MINTING:
                 mintButton.textContent = 'Minting...';
-                mintButton.className = this.mintingButtonClasses;
+                mintButton.className = ButtonClasses.getProgressClasses();
                 mintButton.setAttribute('disabled', 'true');
                 if (loadingIndicator) loadingIndicator.classList.remove('hidden');
                 break;
 
-            case MintButtonState.MINTED:
+            case ButtonState.MINTED:
                 mintButton.textContent = 'Minted';
-                mintButton.className = this.mintedButtonClasses;
+                mintButton.className = ButtonClasses.getMintedClasses();
                 mintButton.setAttribute('disabled', 'true');
+                if (loadingIndicator) loadingIndicator.classList.add('hidden');
+                break;
+        }
+    }
+
+    public updateExperienceButtonState(buttonId: string, state: ButtonState) {
+        const button = document.getElementById(buttonId);
+        if (!button) return;
+
+        const loadingIndicator = button.nextElementSibling as HTMLElement;
+        const buttonType = buttonId.includes('Low') ? 'Low' : buttonId.includes('Mid') ? 'Mid' : 'High';
+
+        switch (state) {
+            case ButtonState.DEFAULT:
+                button.textContent = `Gain ShapeXp ${buttonType}`;
+                button.className = ButtonClasses.combine(ButtonClasses.default);
+                if (loadingIndicator) loadingIndicator.classList.add('hidden');
+                break;
+
+            case ButtonState.GAINING:
+                button.textContent = 'Gaining ShapeXp...';
+                button.className = ButtonClasses.combine(ButtonClasses.progress);
+                if (loadingIndicator) loadingIndicator.classList.remove('hidden');
+                break;
+
+            case ButtonState.GAINED:
+                button.textContent = 'ShapeXp Added!';
+                button.className = ButtonClasses.combine(ButtonClasses.gained);
                 if (loadingIndicator) loadingIndicator.classList.add('hidden');
                 break;
         }
@@ -228,7 +281,7 @@ export class AppState {
         this.restrictedButtons.forEach(buttonId => {
             const button = document.getElementById(buttonId);
             if (button) {
-                button.className = this.buttonBaseClasses;
+                button.className = ButtonClasses.getDefaultClasses();
                 button.removeAttribute('disabled');
             }
         });
@@ -238,10 +291,27 @@ export class AppState {
         this.restrictedButtons.forEach(buttonId => {
             const button = document.getElementById(buttonId);
             if (button) {
-                button.className = 'w-[280px] h-[41px] border-2 border-[#FF7272] rounded-lg uppercase text-base disabled:opacity-50 disabled:cursor-not-allowed';
+                button.className = ButtonClasses.getDisabledClasses();
                 button.setAttribute('disabled', 'true');
             }
         });
+    }
+
+    public updateExperience(experience: bigint, formattedExperience: string) {
+        this.experience = experience;
+        this.formattedExperience = formattedExperience;
+        console.log('Experience updated:', {
+            raw: experience.toString(),
+            formatted: formattedExperience
+        });
+    }
+
+    public getExperience(): bigint {
+        return this.experience;
+    }
+
+    public getFormattedExperience(): string {
+        return this.formattedExperience;
     }
 
     public getIsConnected(): boolean {
