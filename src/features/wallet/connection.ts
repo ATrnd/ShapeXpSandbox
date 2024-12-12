@@ -1,14 +1,17 @@
 import { AppState } from '../../state/state-store';
 import { ButtonState } from '../../types/button-states';
+import { ShapeXpManager } from '../nft/shapeXp-manager';
 
 export class WalletConnection {
     private appState: AppState;
+    private shapeXpManager: ShapeXpManager;
     private readonly CONNECT_BUTTON_ID = 'ShapeXpSandboxConnect';
 
     constructor() {
         console.log('Initializing WalletConnection');
         console.log('-----------------------------');
         this.appState = AppState.getInstance();
+        this.shapeXpManager = new ShapeXpManager();
         this.initializeConnection();
         this.checkExistingConnection();
         this.setupEventListeners();
@@ -47,6 +50,11 @@ export class WalletConnection {
                 this.appState.updateConnection(true, accounts[0]);
                 console.log('Connected:', accounts[0]);
 
+                if (accounts.length > 0) {
+                    this.appState.updateConnection(true, accounts[0]);
+                    await this.shapeXpManager.checkShapeXpOwnership();
+                }
+
             } catch (error) {
                 console.error('Connection error:', error);
                 this.appState.updateConnection(false);
@@ -71,8 +79,9 @@ export class WalletConnection {
             }
         });
 
-        window.ethereum.on('disconnect', () => {
+        window.ethereum.on('disconnect', async () => {
             this.appState.updateConnection(false);
+            await this.shapeXpManager.checkShapeXpOwnership();
             console.log('Wallet disconnected');
         });
     }
