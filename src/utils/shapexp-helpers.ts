@@ -1,5 +1,3 @@
-// src/utils/shapexp-helpers.ts
-
 import { getShapeXpContract, getShapeXpNFTContract } from '../contracts/contract-instances';
 import { Contract } from 'ethers';
 

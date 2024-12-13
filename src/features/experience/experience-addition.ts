@@ -1,14 +1,29 @@
+/**
+ * @title Experience Addition Module
+ * @notice Handles the addition of global experience points to user accounts
+ * @dev Implements error handling and parsing for ShapeXp contract interactions
+ */
+
 import { getShapeXpContract } from '../../contracts/contract-instances';
 import { ExperienceAmount } from '../../contracts/abis';
 import { ContractTransactionResponse } from 'ethers';
 import { Interface } from 'ethers';
 
+/**
+ * @notice Interface for cooldown error data structure
+ * @dev Used for parsing OnCooldown error responses from the contract
+ */
 interface OnCooldownError {
     timeRemaining: bigint;
 }
 
 /**
- * Formats time in seconds to a human-readable string
+ * @notice Converts seconds into a human-readable time format
+ * @dev Formats time as "Xm Ys" where X is minutes and Y is remaining seconds
+ * @param seconds The number of seconds to format
+ * @return string Formatted time string in the format "Xm Ys"
+ * @example
+ * formatTimeRemaining(125n) // Returns "2m 5s"
  */
 function formatTimeRemaining(seconds: bigint): string {
     const totalSeconds = Number(seconds);
@@ -18,7 +33,14 @@ function formatTimeRemaining(seconds: bigint): string {
 }
 
 /**
- * Parses contract error and returns human-readable message
+ * @notice Parses contract errors into human-readable messages
+ * @dev Handles specific ShapeXp contract error cases and provides user-friendly messages
+ * @param error The error object returned from the contract
+ * @return string Human-readable error message
+ * @custom:errors Handles the following contract errors:
+ * - ShapeXpInvExp__OnCooldown
+ * - ShapeXpInvExp__NotShapeXpNFTOwner
+ * - ShapeXpInvExp__InvalidExperienceType
  */
 function parseContractError(error: any): string {
     // Check if error contains data property
@@ -66,9 +88,10 @@ function parseContractError(error: any): string {
 }
 
 /**
- * Adds global experience points to the user's account
- * @param expType - The type of experience to add (LOW, MID, HIGH)
- * @returns Promise with the transaction response
+ * @notice Adds global experience points to the user's account
+ * @dev Initiates a transaction to the ShapeXp contract to add experience points
+ * @param expType The type of experience to add (LOW, MID, HIGH)
+ * @return Promise<ContractTransactionResponse> The transaction response
  */
 export async function addGlobalExperience( expType: ExperienceAmount): Promise<ContractTransactionResponse> {
     try {

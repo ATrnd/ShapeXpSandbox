@@ -1,6 +1,23 @@
+/**
+* @title ShapeXp Error Parser
+* @notice Parses and formats blockchain error messages into human-readable form
+* @dev Decodes custom errors from ShapeXp smart contracts
+* @custom:module-hierarchy Error Handling Component
+*/
+
 import { Interface } from 'ethers';
 import { ShapeXpErrorSignatures, OnCooldownError } from '../types/contract-errors';
 
+/**
+* @notice Parses blockchain errors into user-friendly messages
+* @dev Uses ethers.js Interface to decode custom error data
+* @param error The error object from contract interaction
+* @return string Human-readable error message
+* @custom:errors Handles the following contract errors:
+* - ShapeXpInvExp__OnCooldown: Cooldown period active
+* - ShapeXpInvExp__NotShapeXpNFTOwner: Missing NFT ownership
+* - ShapeXpInvExp__InvalidExperienceType: Invalid experience parameter
+*/
 export function parseShapeXpError(error: any): string {
     // Check if error contains data property
     if (!error.data) {
@@ -25,7 +42,12 @@ export function parseShapeXpError(error: any): string {
             return 'Unknown contract error';
         }
 
-        // Format time for cooldown error
+        /**
+         * @notice Formats cooldown time into readable string
+         * @dev Converts seconds to minutes and seconds format
+         * @param seconds Time in seconds as bigint
+         * @return string Formatted time string "Xm Ys"
+         */
         function formatTimeRemaining(seconds: bigint): string {
             const totalSeconds = Number(seconds);
             const minutes = Math.floor(totalSeconds / 60);

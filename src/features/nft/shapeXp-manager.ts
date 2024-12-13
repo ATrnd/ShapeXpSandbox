@@ -1,3 +1,10 @@
+/**
+* @title ShapeXp NFT Manager
+* @notice Manages ShapeXp NFT minting and ownership verification
+* @dev Handles the complete NFT minting lifecycle and state management
+* @custom:module-hierarchy Core NFT Management Component
+*/
+
 import { AppState } from '../../state/state-store';
 import { checkShapeXpNFTOwnership } from './validation';
 import { getShapeXpNFTContract } from '../../contracts/contract-instances';
@@ -5,16 +12,35 @@ import { ButtonState } from '../../types/button-states';
 import { ButtonClasses } from '../../state/button-classes';
 import { getGlobalExperience } from '../experience/experience-tracking';
 
+/**
+* @notice Manages ShapeXp NFT minting and ownership status
+* @dev Implements singleton pattern via AppState dependency
+* @custom:ui-elements
+* - Mint button
+* - Experience display
+* - Ownership status indicators
+*/
 export class ShapeXpManager {
     private appState: AppState;
     private readonly MINT_BUTTON_ID = 'ShapeXpSandboxMint';
     private isMinting: boolean = false;
 
+   /**
+    * @notice Initializes the NFT manager
+    * @dev Sets up mint button handler and initial state
+    */
     constructor() {
         this.appState = AppState.getInstance();
         this.setupMintButtonHandler();
     }
 
+   /**
+    * @notice Sets up the mint button click handler
+    * @dev Implements double-mint protection and state management
+    * @custom:error-handling
+    * - Prevents multiple simultaneous mints
+    * - Handles already minted state
+    */
     private setupMintButtonHandler() {
         const mintButton = document.getElementById(this.MINT_BUTTON_ID);
         if (!mintButton) return;
@@ -39,6 +65,25 @@ export class ShapeXpManager {
         });
     }
 
+   /**
+    * @notice Handles the complete NFT minting process
+    * @dev Manages gas estimation, transaction, and state updates
+    * @return Promise<ContractTransaction> The mint transaction
+    * @custom:flow
+    * 1. Get contract instance
+    * 2. Estimate gas (with 20% buffer)
+    * 3. Send mint transaction
+    * 4. Wait for confirmation
+    * 5. Verify ownership
+    * 6. Update UI state
+    * @custom:gas-handling
+    * - Estimates gas dynamically
+    * - Adds 20% buffer for safety
+    * @custom:error-handling
+    * - Contract interaction failures
+    * - Transaction errors
+    * - State update failures
+    */
     private async handleMint() {
         this.isMinting = true;
         this.appState.updateMintButtonState(ButtonState.MINTING);
@@ -89,6 +134,19 @@ export class ShapeXpManager {
         }
     }
 
+   /**
+    * @notice Verifies ShapeXp NFT ownership and updates related states
+    * @dev Checks ownership and updates experience display if owned
+    * @custom:flow
+    * 1. Check NFT ownership
+    * 2. Update NFT status
+    * 3. Fetch and update experience if owned
+    * 4. Reset display if not owned
+    * @custom:state-updates
+    * - NFT ownership status
+    * - Experience amount
+    * - Button states
+    */
     public async checkShapeXpOwnership() {
         try {
 
@@ -119,6 +177,11 @@ export class ShapeXpManager {
         }
     }
 
+   /**
+    * @notice Updates the experience display in the UI
+    * @dev Updates DOM element with formatted experience amount
+    * @param amount Formatted experience amount string
+    */
     private updateExperienceDisplay(amount: string) {
         const expElement = document.getElementById('ShapeXpAmount');
         if (expElement) {

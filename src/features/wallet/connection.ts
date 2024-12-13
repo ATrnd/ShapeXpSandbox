@@ -1,15 +1,38 @@
+/**
+* @title Wallet Connection Manager
+* @notice Manages wallet connection state and Ethereum provider interactions
+* @dev Handles wallet connection lifecycle, event listeners, and state management
+* @custom:module-hierarchy Core Wallet Management Component
+*/
+
 import { AppState } from '../../state/state-store';
 import { ButtonState } from '../../types/button-states';
 import { ShapeXpManager } from '../nft/shapeXp-manager';
 import { CooldownTimer } from '../../utils/cooldown-timer';
 
-
+/**
+* @notice Manages wallet connection and related state
+* @dev Implements connection handling and Ethereum provider events
+* @custom:ui-elements
+* - Connect button
+* - Connection status indicators
+* - Loading states
+*/
 export class WalletConnection {
     private appState: AppState;
     private shapeXpManager: ShapeXpManager;
     private cooldownTimer: CooldownTimer;
     private readonly CONNECT_BUTTON_ID = 'ShapeXpSandboxConnect';
 
+   /**
+    * @notice Initializes wallet connection manager
+    * @dev Sets up initial state and event listeners
+    * @custom:flow
+    * 1. Initialize dependencies
+    * 2. Check existing connection
+    * 3. Setup event listeners
+    * 4. Initialize UI handlers
+    */
     constructor() {
         console.log('Initializing WalletConnection');
         console.log('-----------------------------');
@@ -24,6 +47,14 @@ export class WalletConnection {
         });
     }
 
+   /**
+    * @notice Initializes wallet state from existing connection
+    * @dev Checks for existing Ethereum provider connection
+    * @custom:error-handling
+    * - Handles missing provider
+    * - Handles connection failures
+    * - Handles state restoration errors
+    */
     private async initializeState() {
         if (!window.ethereum?.request) return;
 
@@ -44,6 +75,10 @@ export class WalletConnection {
         }
     }
 
+   /**
+    * @notice Sets up handler for disabled connection button
+    * @dev Prevents interaction when already connected
+    */
     private setupDisabledClickHandler() {
         const connectButton = document.getElementById(this.CONNECT_BUTTON_ID);
         if (!connectButton) return;
@@ -55,6 +90,14 @@ export class WalletConnection {
         });
     }
 
+   /**
+    * @notice Initializes wallet connection functionality
+    * @dev Sets up connection request handling and state updates
+    * @custom:error-handling
+    * - Provider not found
+    * - User rejection
+    * - Connection failures
+    */
     private async initializeConnection() {
         const connectButton = document.getElementById(this.CONNECT_BUTTON_ID);
         if (!connectButton || !window.ethereum || !window.ethereum.request) return;
@@ -87,6 +130,18 @@ export class WalletConnection {
         });
     }
 
+   /**
+    * @notice Sets up Ethereum provider event listeners
+    * @dev Handles account changes and disconnection events
+    * @custom:events
+    * - accountsChanged
+    * - disconnect
+    * @custom:state-updates
+    * - Connection status
+    * - Account address
+    * - NFT ownership
+    * - Cooldown timer
+    */
     private setupEventListeners() {
         if (!window.ethereum?.on) return;
 
@@ -110,6 +165,13 @@ export class WalletConnection {
         });
     }
 
+   /**
+    * @notice Checks for existing wallet connection
+    * @dev Queries Ethereum provider for connected accounts
+    * @custom:error-handling
+    * - Provider not found
+    * - Request failures
+    */
     private async checkExistingConnection() {
         if (!window.ethereum?.request) return;
 
@@ -127,6 +189,12 @@ export class WalletConnection {
         }
     }
 
+   /**
+    * @notice Updates button loading state
+    * @dev Manages button and loading indicator visibility
+    * @param buttonId The ID of the button to update
+    * @param isLoading Loading state to set
+    */
     private setButtonLoading(buttonId: string, isLoading: boolean) {
         const button = document.getElementById(buttonId);
         const loadingIndicator = button?.nextElementSibling as HTMLElement;

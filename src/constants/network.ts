@@ -1,4 +1,3 @@
-// src/constants/network.ts
 export const NETWORK = {
     SHAPE_SEPOLIA: {
         CHAIN_ID: 11011,

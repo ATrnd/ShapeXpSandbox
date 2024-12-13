@@ -1,3 +1,10 @@
+/**
+ * @title Experience Manager
+ * @notice Manages the experience point system UI interactions and state
+ * @dev Handles button state management, experience transactions, and UI updates
+ * @custom:module-hierarchy Core Feature Component
+ */
+
 import { ButtonState, ExperienceAmount } from '../../types/button-states';
 import { ButtonClasses } from '../../state/button-classes';
 import { addGlobalExperience } from './experience-addition';
@@ -7,24 +14,44 @@ import { AppState } from '../../state/state-store';
 import { parseShapeXpError } from '../../utils/error-decoder.ts';
 import { CooldownTimer } from '../../utils/cooldown-timer';
 
+/**
+ * @notice Manages experience point interactions and UI state
+ * @dev Implements Singleton pattern via dependency injection
+ * @custom:ui-elements
+ * - Experience buttons (Low, Mid, High)
+ * - Experience display
+ * - Status indicators
+ */
 export class ExperienceManager {
     private appState: AppState;
     private isProcessing: boolean = false;
     private logManager: LogManager;
     private cooldownTimer: CooldownTimer;
 
+    /**
+     * @notice Button IDs for experience interaction
+     * @dev Maps to HTML elements in the DOM
+     */
     private readonly experienceButtons = [
         'ShapeXpSandboxXpLow',
         'ShapeXpSandboxXpMid',
         'ShapeXpSandboxXpHigh'
     ];
 
+    /**
+     * @notice Maps button IDs to their corresponding experience amounts
+     * @dev Used for contract interaction mapping
+     */
     private readonly experienceTypes = {
         'ShapeXpSandboxXpLow': ExperienceAmount.LOW,
         'ShapeXpSandboxXpMid': ExperienceAmount.MID,
         'ShapeXpSandboxXpHigh': ExperienceAmount.HIGH
     } as const;
 
+    /**
+     * @notice Initializes the experience manager
+     * @dev Sets up singleton instances and initializes UI elements
+     */
     constructor() {
         this.logManager = LogManager.getInstance();
         this.appState = AppState.getInstance();
@@ -32,6 +59,11 @@ export class ExperienceManager {
         this.initializeExperienceButtons();
     }
 
+    /**
+     * @notice Sets up experience button click handlers
+     * @dev Attaches event listeners to each experience button
+     * @custom:error-handling Prevents multiple simultaneous transactions
+     */
     private initializeExperienceButtons() {
         Object.entries(this.experienceTypes).forEach(([buttonId, expType]) => {
             const button = document.getElementById(buttonId);
@@ -48,6 +80,10 @@ export class ExperienceManager {
         });
     }
 
+    /**
+     * @notice Disables all experience gain buttons
+     * @dev Updates button states and CSS classes
+     */
     private disableAllExperienceButtons() {
         this.experienceButtons.forEach(buttonId => {
             const button = document.getElementById(buttonId);
@@ -58,6 +94,10 @@ export class ExperienceManager {
         });
     }
 
+    /**
+     * @notice Re-enables all experience gain buttons
+     * @dev Restores default button states and CSS classes
+     */
     private enableAllExperienceButtons() {
         this.experienceButtons.forEach(buttonId => {
             const button = document.getElementById(buttonId);
@@ -68,25 +108,24 @@ export class ExperienceManager {
         });
     }
 
-    //private disableAllButtons() {
-    //    this.experienceButtons.forEach(buttonId => {
-    //        const button = document.getElementById(buttonId);
-    //        if (button) {
-    //            button.setAttribute('disabled', 'true');
-    //        }
-    //    });
-    //}
-
-    //private enableAllButtons() {
-    //    this.experienceButtons.forEach(buttonId => {
-    //        const button = document.getElementById(buttonId);
-    //        if (button) {
-    //            button.removeAttribute('disabled');
-    //            this.appState.updateExperienceButtonState(buttonId, ButtonState.DEFAULT);
-    //        }
-    //    });
-    //}
-
+    /**
+     * @notice Handles the experience addition process
+     * @dev Manages the complete flow of adding experience points
+     * @param buttonId The ID of the clicked button
+     * @param expType The type of experience to add
+     * @custom:flow
+     * 1. Disable UI interactions
+     * 2. Update UI state
+     * 3. Send transaction
+     * 4. Handle confirmation
+     * 5. Update experience display
+     * 6. Start cooldown
+     * 7. Reset UI state
+     * @custom:error-handling
+     * - Transaction failures
+     * - Contract errors
+     * - Network issues
+     */
     private async handleExperienceAdd(buttonId: string, expType: ExperienceAmount) {
         if (this.isProcessing) return;
 
@@ -140,6 +179,11 @@ export class ExperienceManager {
         }
     }
 
+    /**
+     * @notice Updates the experience display in the UI
+     * @dev Updates the DOM element showing current experience
+     * @param amount Formatted experience amount to display
+     */
     private updateExperienceDisplay(amount: string) {
         const expElement = document.getElementById('ShapeXpAmount');
         if (expElement) {

@@ -1,4 +1,3 @@
-// src/constants/logging.ts
 export enum LogType {
     EXPERIENCE = 'experience',
     NFT = 'nft',
