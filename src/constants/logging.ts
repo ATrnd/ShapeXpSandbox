@@ -1,3 +1,21 @@
+/**
+* @title Log Type Constants and Messages
+* @notice Defines logging types and messages for ShapeXp system events
+* @dev Constants for standardized logging across the application
+* @custom:module-hierarchy Core Logging Component
+*/
+
+/**
+* @notice Enum for all possible log event types
+* @dev Used to identify the type of action being logged
+* @custom:events
+* - Experience: Experience point transactions
+* - NFT: NFT inventory management
+* - NFT Experience: NFT-specific experience
+* - NFT Remove: NFT removal events
+* - Mint: ShapeXp NFT minting
+* - Connection: Wallet connection status
+*/
 export enum LogType {
     EXPERIENCE = 'experience',
     NFT = 'nft',
@@ -7,17 +25,42 @@ export enum LogType {
     CONNECTION = 'connection'
 }
 
+/**
+* @notice Interface for log message structure
+* @dev Defines the three states of any logged action
+* @custom:states
+* - ADDING: Action in progress
+* - ADDED: Action completed successfully
+* - FAILED: Action failed
+*/
 type LogMessage = {
     ADDING: string;
     ADDED: string;
     FAILED: string;
 }
 
+/**
+* @notice Type mapping LogTypes to message structures
+* @dev Creates a complete mapping of all log types to their messages
+* @custom:mapping Maps each LogType enum to LogMessage structure
+*/
 type LogMessages = {
     [key in LogType]: LogMessage;
 }
 
+/**
+* @notice Main logging configuration object
+* @dev Contains all log messages and element IDs
+* @custom:structure Two main sections:
+* 1. MESSAGES: Action-specific log messages
+* 2. ELEMENTS: DOM element IDs for log display
+*/
 export const LOGS = {
+   /**
+    * @notice Message configurations for each log type
+    * @dev Mapped using LogType enum as keys
+    * @custom:format Each type has three states: ADDING, ADDED, FAILED
+    */
     MESSAGES: {
         [LogType.EXPERIENCE]: {
             ADDING: 'Adding experience...',
@@ -50,6 +93,15 @@ export const LOGS = {
             FAILED: 'Disconnected'
         }
     } as LogMessages,
+
+   /**
+    * @notice DOM element IDs for log display
+    * @dev Used to locate and update log display elements
+    * @custom:elements
+    * - WRAP: Container element
+    * - INFO: Message display element
+    * - LOADING: Loading indicator element
+    */
     ELEMENTS: {
         WRAP: 'ShapeXpLogWrap',
         INFO: 'ShapeXpLogNfo',
