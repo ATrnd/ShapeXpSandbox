@@ -13,3 +13,21 @@
 .aux-mono {
     font-family: 'aux_monoregular';
 }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+body {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+svg {
+  animation: fadeIn 0.5s ease-in-out;
+}
+

@@ -1,59 +1,166 @@
 /**
-* @title ShapeXp Helper Usage Examples
-* @notice Demonstrates usage patterns for ShapeXp utility functions
-* @dev Example implementations of ShapeXpHelpers class methods
-* @custom:module-hierarchy Documentation/Examples
+* @title ShapeXp Sandbox API
+* @notice Developer interface for ShapeXp integration and data access
+* @dev Provides global window.ShapeXpAPI object with core functionality
+* @custom:module-hierarchy Integration API Component
 */
 
 import { ShapeXpHelpers } from '../utils/shapexp-helpers';
+import { getCurrentAddress } from '../utils/provider';
 
 /**
-* @notice Example implementation of ShapeXp helper functions
-* @dev Demonstrates all main helper functionalities
-* @custom:examples
-* - NFT ownership check
-* - Experience retrieval
-* - Combined data fetch
+* @title ShapeXp Sandbox Interface
+* @notice Core class exposing ShapeXp functionality to external applications
+* @dev Implements window.ShapeXpAPI interface for developer access
+* @custom:interface Global ShapeXpAPI object
 */
-async function example() {
-    const address = "0xbe0d3F1D8E318dca82f860Dd7aDDc1149DD06662"; // The address to check
+export class ShapeXpSandbox {
+    constructor() {
+        /**
+         * @notice Gets current account's ShapeXp amount
+         * @dev Retrieves formatted experience from AppState
+         * @return Promise<string> Formatted ShapeXp amount
+         * @custom:requires Connected wallet
+         * @custom:example
+         * const xp = await ShapeXpAPI.getShapeXp();
+         * console.log('Current ShapeXp:', xp);
+         */
+        window.ShapeXpAPI = {
+            // Get current ShapeXp amount
+            getShapeXp: async () => {
+                const appState = (window as any).appState;
+                return appState.getFormattedExperience();
+            },
 
-   /**
-    * @notice Example wallet address for demonstration
-    * @dev Replace with actual address in implementation
-    */
-    const hasShapeXp = await ShapeXpHelpers.ownsShapeXp(address);
-    console.log('Has ShapeXp:', hasShapeXp);
+           /**
+            * @notice Subscribes to ShapeXp amount changes
+            * @dev Sets up event listener for shapexp-update events
+            * @param callback Function to execute when ShapeXp changes
+            * @custom:events shapexp-update
+            * @custom:example
+            * ShapeXpAPI.onShapeXpChange((amount) => {
+            *   console.log('ShapeXp updated:', amount);
+            * });
+            */
+            onShapeXpChange: (callback: (amount: string) => void) => {
+                document.addEventListener('shapexp-update', (e: any) => {
+                    callback(e.detail.experience);
+                });
+            },
 
-   /**
-    * @notice Example 2: Experience Retrieval
-    * @dev Demonstrates experience data fetching with error handling
-    * @custom:returns
-    * - experience: Raw bigint value
-    * - formatted: String formatted value
-    */
-    try {
-        const exp = await ShapeXpHelpers.getExperience(address);
-        console.log('Experience:', exp.formatted);
-    } catch (error) {
-        console.error('Error getting experience:', error);
+           /**
+            * @notice Checks if current wallet owns ShapeXp NFT
+            * @dev Verifies NFT ownership for connected address
+            * @return Promise<boolean> True if wallet owns ShapeXp NFT
+            * @custom:requires Connected wallet
+            * @custom:example
+            * const hasNFT = await ShapeXpAPI.hasShapeXp();
+            * console.log('Has ShapeXp NFT:', hasNFT);
+            */
+            hasShapeXp: async () => {
+                const address = await getCurrentAddress();
+                return ShapeXpHelpers.ownsShapeXp(address);
+            },
+
+           /**
+            * @notice Looks up ShapeXp amount for any address
+            * @dev Fetches and formats experience points for specified address
+            * @param address Ethereum address to look up
+            * @return Promise<Object> Success status and ShapeXp data
+            * @custom:returns
+            * - success: true/false
+            * - amount: Formatted ShapeXp amount (if success)
+            * - raw: Raw ShapeXp amount (if success)
+            * - error: Error message (if !success)
+            * @custom:example
+            * const data = await ShapeXpAPI.shapeXpLookup("0x123...");
+            * if (data.success) {
+            *   console.log('ShapeXp amount:', data.amount);
+            * }
+            */
+            shapeXpLookup: async (address: string) => {
+                try {
+                    const { experience, formatted } = await ShapeXpHelpers.getExperience(address);
+                    return {
+                        success: true,
+                        amount: formatted,
+                        raw: experience.toString()
+                    };
+                } catch (error) {
+                    return {
+                        success: false,
+                        error: 'Failed to fetch ShapeXp'
+                    };
+                }
+            },
+
+           /**
+            * @notice Checks ShapeXp NFT ownership for any address
+            * @dev Verifies if specified address owns ShapeXp NFT
+            * @param address Ethereum address to check
+            * @return Promise<Object> Success status and ownership data
+            * @custom:returns
+            * - success: true/false
+            * - hasNFT: Ownership status (if success)
+            * - error: Error message (if !success)
+            * @custom:example
+            * const data = await ShapeXpAPI.shapeXpLookupNFT("0x123...");
+            * if (data.success) {
+            *   console.log('Owns ShapeXp NFT:', data.hasNFT);
+            * }
+            */
+            shapeXpLookupNFT: async (address: string) => {
+                try {
+                    const hasNFT = await ShapeXpHelpers.ownsShapeXp(address);
+                    return {
+                        success: true,
+                        hasNFT
+                    };
+                } catch (error) {
+                    return {
+                        success: false,
+                        error: 'Failed to check NFT ownership'
+                    };
+                }
+            }
+        };
     }
+}
 
-   /**
-    * @notice Example 3: Combined Data Retrieval
-    * @dev Demonstrates comprehensive data fetch with ownership and experience
-    * @custom:returns
-    * - ownsShapeXp: Boolean
-    * - experience: Optional experience data
-    */
-    try {
-        const data = await ShapeXpHelpers.getShapeXpData(address);
-        if (data.ownsShapeXp) {
-            console.log('Has ShapeXp with experience:', data.experience?.formatted);
-        } else {
-            console.log('Address does not own ShapeXp');
+// Initialize sandbox
+new ShapeXpSandbox();
+
+/**
+* @notice Global type definitions for ShapeXpAPI
+* @dev Extends Window interface with ShapeXpAPI types
+* @custom:api-methods
+* - getShapeXp
+* - onShapeXpChange
+* - hasShapeXp
+* - shapeXpLookup
+* - shapeXpLookupNFT
+*/
+declare global {
+    interface Window {
+        ShapeXpAPI: {
+            getShapeXp: () => Promise<string>;
+            onShapeXpChange: (callback: (amount: string) => void) => void;
+            hasShapeXp: () => Promise<boolean>;
+            shapeXpLookup: (address: string) => Promise<{
+                success: true;
+                amount: string;
+                raw: string;
+            } | {
+                success: false;
+                error: string;
+            }>;
+            shapeXpLookupNFT: (address: string) => Promise<{
+                success: true;
+                hasNFT: boolean;
+            } | {
+                success: false;
+                error: string;
+            }>;
         }
-    } catch (error) {
-        console.error('Error getting ShapeXp data:', error);
     }
 }
