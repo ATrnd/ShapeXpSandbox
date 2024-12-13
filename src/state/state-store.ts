@@ -119,7 +119,6 @@ export class AppState {
         'ShapeXpSandboxXpLow',
         'ShapeXpSandboxXpMid',
         'ShapeXpSandboxXpHigh',
-        'ShapeXpSandboxXpLookup'
     ];
 
     private constructor() {
@@ -142,14 +141,19 @@ export class AppState {
     private updateButtonsBasedOnNFT() {
         if (!this.isConnected) return;
 
+        console.log('Updating buttons based on NFT ownership:', this.hasNFT);
         const mintButton = document.getElementById('ShapeXpSandboxMint');
 
         if (this.hasNFT) {
+            // When user has ShapeXp NFT:
+            // 1. Disable mint button
             if (mintButton) {
-                mintButton.className = ButtonClasses.getConnectedClasses();
+                mintButton.className = ButtonClasses.getMintedClasses();
                 mintButton.setAttribute('disabled', 'true');
+                mintButton.textContent = 'Minted';
             }
 
+            // 2. Enable all experience buttons
             this.restrictedButtons.forEach(buttonId => {
                 if (buttonId !== 'ShapeXpSandboxMint') {
                     const button = document.getElementById(buttonId);
@@ -160,11 +164,15 @@ export class AppState {
                 }
             });
         } else {
+            // When user doesn't have ShapeXp NFT:
+            // 1. Enable mint button
             if (mintButton) {
                 mintButton.className = ButtonClasses.getDefaultClasses();
                 mintButton.removeAttribute('disabled');
+                mintButton.textContent = 'Mint ShapeXp';
             }
 
+            // 2. Disable all experience buttons
             this.restrictedButtons.forEach(buttonId => {
                 if (buttonId !== 'ShapeXpSandboxMint') {
                     const button = document.getElementById(buttonId);
@@ -198,14 +206,16 @@ export class AppState {
 
         if (!isConnected) {
             this.hasNFT = false;
-        }
-
-        if (isConnected && address) {
-            console.log('connected');
-            this.updateConnectButtonState(ButtonState.COMPLETED);
-        } else {
             this.disableButtons();
             this.updateConnectButtonState(ButtonState.DEFAULT);
+        } else if (isConnected && address) {
+            console.log('connected');
+            this.updateConnectButtonState(ButtonState.COMPLETED);
+            const mintButton = document.getElementById('ShapeXpSandboxMint');
+            if (mintButton) {
+                mintButton.className = ButtonClasses.getDefaultClasses();
+                mintButton.removeAttribute('disabled');
+            }
         }
     }
 
@@ -327,7 +337,7 @@ export class AppState {
         this.formattedExperience = formattedExperience;
 
         // Add this: Update display when experience changes
-        const expElement = document.querySelector('.aux-mono.text-white li:first-child');
+        const expElement = document.getElementById('ShapeXpAmount');
         if (expElement) {
             expElement.textContent = `shapexp: ${formattedExperience}`;
         }
@@ -336,6 +346,19 @@ export class AppState {
             raw: experience.toString(),
             formatted: formattedExperience
         });
+    }
+
+    public resetState() {
+        // Reset experience
+        this.experience = BigInt(0);
+        this.formattedExperience = '0';
+        this.hasNFT = false;
+
+        // Reset experience display
+        const expElement = document.getElementById('ShapeXpAmount');
+        if (expElement) {
+            expElement.textContent = `shapexp: 0`;
+        }
     }
 
     public getExperience(): bigint {

@@ -15,6 +15,18 @@ export class CooldownTimer {
         return CooldownTimer.instance;
     }
 
+    public resetTimer() {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+
+        const cooldownElement = document.getElementById('ShapeXpCooldown');
+        if (cooldownElement) {
+            cooldownElement.textContent = 'xp cooldown: 0';
+        }
+    }
+
     public startCooldown() {
         // Clear any existing timer
         if (this.timerInterval) {

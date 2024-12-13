@@ -94,12 +94,20 @@ export class ExperienceManager {
             this.isProcessing = true; // Set processing flag
             this.disableAllExperienceButtons(); // Disable all buttons
 
+            console.log('Starting experience addition...', {  // Added
+                buttonId,
+                expType: ExperienceAmount[expType]
+            });
+
             // Update UI to show progress
             this.appState.updateExperienceButtonState(buttonId, ButtonState.GAINING);
             this.logManager.updateExperienceStatus('start');
 
-            // Call contract
-            await addGlobalExperience(expType);
+            const tx = await addGlobalExperience(expType);
+            console.log('Experience transaction sent:', tx.hash);
+
+            await tx.wait(1);
+            console.log('Experience transaction confirmed');
 
             // Show success state
             this.appState.updateExperienceButtonState(buttonId, ButtonState.GAINED);
@@ -107,12 +115,11 @@ export class ExperienceManager {
 
             // Get updated experience
             const { experience, formattedExperience } = await getGlobalExperience();
+
+            console.log('New experience amount:', formattedExperience); // Added
+
             this.appState.updateExperience(experience, formattedExperience);
-
-            // Add this: Update the display
             this.updateExperienceDisplay(formattedExperience);
-
-            // Start cooldown timer after successful experience gain
             this.cooldownTimer.startCooldown();
 
             // Reset to default state after delay
@@ -134,7 +141,7 @@ export class ExperienceManager {
     }
 
     private updateExperienceDisplay(amount: string) {
-        const expElement = document.querySelector('.aux-mono.text-white li:first-child');
+        const expElement = document.getElementById('ShapeXpAmount');
         if (expElement) {
             expElement.textContent = `shapexp: ${amount}`;
         }

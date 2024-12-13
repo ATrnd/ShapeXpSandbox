@@ -1,10 +1,13 @@
 import { AppState } from '../../state/state-store';
 import { ButtonState } from '../../types/button-states';
 import { ShapeXpManager } from '../nft/shapeXp-manager';
+import { CooldownTimer } from '../../utils/cooldown-timer';
+
 
 export class WalletConnection {
     private appState: AppState;
     private shapeXpManager: ShapeXpManager;
+    private cooldownTimer: CooldownTimer;
     private readonly CONNECT_BUTTON_ID = 'ShapeXpSandboxConnect';
 
     constructor() {
@@ -12,6 +15,7 @@ export class WalletConnection {
         console.log('-----------------------------');
         this.appState = AppState.getInstance();
         this.shapeXpManager = new ShapeXpManager();
+        this.cooldownTimer = CooldownTimer.getInstance();
 
         this.initializeState().then(() => {
             this.initializeConnection();
@@ -88,16 +92,19 @@ export class WalletConnection {
 
         window.ethereum.on('accountsChanged', async (accounts: string[]) => {
             if (accounts.length === 0) {
+                this.appState.resetState();
+                this.cooldownTimer.resetTimer();
                 this.appState.updateConnection(false);
-                // console.log('Disconnected');
             } else {
                 this.appState.updateConnection(true, accounts[0]);
+                await this.shapeXpManager.checkShapeXpOwnership();
                 console.log('Account changed:', accounts[0]);
             }
         });
 
         window.ethereum.on('disconnect', async () => {
             this.appState.updateConnection(false);
+            this.cooldownTimer.resetTimer();
             await this.shapeXpManager.checkShapeXpOwnership();
             console.log('Wallet disconnected');
         });

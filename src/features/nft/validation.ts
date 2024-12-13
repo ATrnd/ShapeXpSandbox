@@ -4,24 +4,21 @@ import { getShapeXpNFTContract } from '../../contracts/contract-instances';
 
 export async function checkShapeXpNFTOwnership(): Promise<boolean> {
     try {
-
         const nftContract = await getShapeXpNFTContract();
         const userAddress = await getCurrentAddress();
-        console.log('NFT Contract for validation:', {
-            address: nftContract.target,
-            userAddress: userAddress
+
+        console.log('Checking NFT ownership for:', {
+            contract: nftContract.target,
+            user: userAddress
         });
 
         const hasMinted = await nftContract.hasMintedToken(userAddress);
         console.log('hasMintedToken result:', hasMinted);
-
         return hasMinted;
 
     } catch (error: any) {
-        console.error('Error in hasMintedToken check:', {
-            error,
-            message: error.message
-        });
+        // If the contract call reverts, it means they don't have the token
+        console.log('No ShapeXp token found for user');
         return false;
     }
 }
