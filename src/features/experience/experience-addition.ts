@@ -58,7 +58,7 @@ export async function addGlobalExperience(expType: ExperienceAmount): Promise<Ex
     } catch (error: any) {
         const parsedError = parseExperienceError(error);
 
-        console.error('Experience addition failed:', {
+        console.log('[shapeXp :: Experience addition error]', {
             code: parsedError.code,
             message: parsedError.message,
             details: parsedError.details,

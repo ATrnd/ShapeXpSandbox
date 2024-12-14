@@ -142,11 +142,13 @@ export class ExperienceManager {
             this.appState.updateExperienceButtonState(buttonId, ButtonState.GAINING);
             this.logManager.updateExperienceStatus('start');
 
-            const tx = await addGlobalExperience(expType);
-            console.log('Experience transaction sent:', tx.hash);
+            const result = await addGlobalExperience(expType);
 
-            await tx.wait(1);
-            console.log('Experience transaction confirmed');
+            if (!result.success) {
+                throw new Error(result.error?.message || 'Failed to add experience');
+            }
+
+            console.log('Experience transaction sent:', result.transactionHash);
 
             // Show success state
             this.appState.updateExperienceButtonState(buttonId, ButtonState.GAINED);
@@ -155,7 +157,7 @@ export class ExperienceManager {
             // Get updated experience
             const { experience, formattedExperience } = await getGlobalExperience();
 
-            console.log('New experience amount:', formattedExperience); // Added
+            console.log('New experience amount:', formattedExperience);
 
             this.appState.updateExperience(experience, formattedExperience);
             this.updateExperienceDisplay(formattedExperience);

@@ -12,7 +12,6 @@ import { InventoryData } from '../features/nft/inventory';
 import { ExperienceAmount } from '../contracts/abis';
 import { ContractTransactionResponse } from 'ethers';
 
-
 /**
 * @title ShapeXp Sandbox Interface
 * @notice Core class exposing ShapeXp functionality to external applications

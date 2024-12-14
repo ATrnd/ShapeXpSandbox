@@ -42,79 +42,94 @@ export function parseExperienceError(error: any): {
         };
     }
 
-    // Handle timeout
-    if (error.message?.includes('timeout')) {
-        return {
-            code: ExperienceErrorCodes.TRANSACTION_TIMEOUT,
-            message: ExperienceErrorMessages.TransactionTimeout
-        };
-    }
-
-    // If no error data, return generic error
-    if (!error.data) {
-        return {
-            code: ExperienceErrorCodes.UNKNOWN,
-            message: error.message || ExperienceErrorMessages.Unknown
-        };
-    }
-
     try {
-        // Create interface for error decoding
-        const iface = new Interface([
-            `error ${ExperienceErrorSignatures.OnCooldown}`,
-            `error ${ExperienceErrorSignatures.NotShapeXpNFTOwner}`,
-            `error ${ExperienceErrorSignatures.InvalidExperienceType}`,
-            `error ${ExperienceErrorSignatures.InsufficientGlobalExperience}`
-        ]);
+        // First, try to get error data from estimate gas error
+        let errorData;
 
-        // Decode error
-        const decodedError = iface.parseError(error.data);
-
-        if (!decodedError) {
-            return {
-                code: ExperienceErrorCodes.UNKNOWN,
-                message: ExperienceErrorMessages.Unknown
-            };
+        if (error.data) {
+            errorData = error.data;
+        } else if (error.message && error.message.includes('execution reverted')) {
+            // Extract error data from revert message
+            const match = error.message.match(/data="([^"]+)"/);
+            if (match) {
+                errorData = match[1];
+            }
         }
 
-        // Handle specific errors
-        switch (decodedError.name) {
-            case 'ShapeXpInvExp__OnCooldown': {
-                const { timeRemaining } = decodedError.args as unknown as OnCooldownError;
-                const formattedTime = formatTimeRemaining(timeRemaining);
+        if (errorData) {
+            const iface = new Interface([
+                `error ${ExperienceErrorSignatures.OnCooldown}`,
+                `error ${ExperienceErrorSignatures.NotShapeXpNFTOwner}`,
+                `error ${ExperienceErrorSignatures.InvalidExperienceType}`,
+                `error ${ExperienceErrorSignatures.InsufficientGlobalExperience}`
+            ]);
+
+            try {
+                // Handle both full error data and hex string
+                const decodedError = iface.parseError(
+                    errorData.startsWith('0x') ? errorData : `0x${errorData}`
+                );
+
+                if (decodedError) {
+                    switch(decodedError.name) {
+                        case 'ShapeXpInvExp__OnCooldown': {
+                            const timeRemaining = decodedError.args[0];
+                            const formattedTime = formatTimeRemaining(timeRemaining);
+                            return {
+                                code: ExperienceErrorCodes.ON_COOLDOWN,
+                                message: ExperienceErrorMessages.OnCooldown(formattedTime),
+                                details: { timeRemaining: timeRemaining.toString() }
+                            };
+                        }
+                        case 'ShapeXpInvExp__NotShapeXpNFTOwner':
+                            return {
+                                code: ExperienceErrorCodes.NOT_NFT_OWNER,
+                                message: ExperienceErrorMessages.NotShapeXpNFTOwner
+                            };
+                        case 'ShapeXpInvExp__InvalidExperienceType':
+                            return {
+                                code: ExperienceErrorCodes.INVALID_TYPE,
+                                message: ExperienceErrorMessages.InvalidExperienceType
+                            };
+                        case 'ShapeXpInvExp__InsufficientGlobalExperience':
+                            return {
+                                code: ExperienceErrorCodes.INSUFFICIENT_EXPERIENCE,
+                                message: ExperienceErrorMessages.InsufficientGlobalExperience
+                            };
+                        default:
+                            return {
+                                code: ExperienceErrorCodes.UNKNOWN,
+                                message: `Unknown contract error: ${decodedError.name}`
+                            };
+                    }
+                }
+            } catch (decodeError) {
+                console.debug('Error decoding data:', decodeError);
+            }
+        }
+
+        // If we couldn't decode the error, try to extract meaning from the message
+        if (error.message) {
+            if (error.message.includes('cooldown')) {
                 return {
                     code: ExperienceErrorCodes.ON_COOLDOWN,
-                    message: ExperienceErrorMessages.OnCooldown(formattedTime),
-                    details: { timeRemaining: timeRemaining.toString(), formatted: formattedTime }
+                    message: 'Experience gain is on cooldown'
                 };
             }
-            case 'ShapeXpInvExp__NotShapeXpNFTOwner':
-                return {
-                    code: ExperienceErrorCodes.NOT_NFT_OWNER,
-                    message: ExperienceErrorMessages.NotShapeXpNFTOwner
-                };
-            case 'ShapeXpInvExp__InvalidExperienceType':
-                return {
-                    code: ExperienceErrorCodes.INVALID_TYPE,
-                    message: ExperienceErrorMessages.InvalidExperienceType
-                };
-            case 'ShapeXpInvExp__InsufficientGlobalExperience':
-                return {
-                    code: ExperienceErrorCodes.INSUFFICIENT_EXPERIENCE,
-                    message: ExperienceErrorMessages.InsufficientGlobalExperience
-                };
-            default:
-                return {
-                    code: ExperienceErrorCodes.UNKNOWN,
-                    message: `Unknown contract error: ${decodedError.name}`
-                };
         }
+
+        return {
+            code: ExperienceErrorCodes.UNKNOWN,
+            message: error.message || ExperienceErrorMessages.Unknown,
+            details: error
+        };
+
     } catch (parseError) {
         console.error('Error parsing experience error:', parseError);
         return {
             code: ExperienceErrorCodes.UNKNOWN,
             message: error.message || ExperienceErrorMessages.Unknown,
-            details: parseError
+            details: { parseError, originalError: error }
         };
     }
 }

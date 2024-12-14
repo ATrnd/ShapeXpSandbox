@@ -37,18 +37,18 @@ export async function mintShapeXpNFT(): Promise<MintResult> {
 
         return {
             success: true,
-            tx: receipt.hash
+            tx
         };
 
     } catch (error: any) {
         const parsedError = parseMintError(error);
 
-        console.log('--- [shapeXp :: Minting error] ---', '\n-----------------------------------', {
+        console.log('[shapeXp :: Minting error]', {
             code: parsedError.code,
             message: parsedError.message,
             details: parsedError.details,
             originalError: error
-        }, '\n-----------------------------------');
+        }, );
 
         return {
             success: false,

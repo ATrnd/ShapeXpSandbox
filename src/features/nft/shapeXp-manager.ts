@@ -11,6 +11,7 @@ import { getShapeXpNFTContract } from '../../contracts/contract-instances';
 import { ButtonState } from '../../types/button-states';
 import { ButtonClasses } from '../../state/button-classes';
 import { getGlobalExperience } from '../experience/experience-tracking';
+import { mintShapeXpNFT } from './minting';
 
 /**
 * @notice Manages ShapeXp NFT minting and ownership status
@@ -90,41 +91,30 @@ export class ShapeXpManager {
 
         try {
             console.log('1. Initiating mint process...');
-            const nftContract = await getShapeXpNFTContract();
-            console.log('2. Got NFT contract:', nftContract.target);
+            const result = await mintShapeXpNFT();
 
-            console.log('3. Estimating gas...');
-            const gasLimit = await nftContract.mint.estimateGas();
-            console.log('4. Estimated gas:', gasLimit.toString());
+            if (!result.success) {
+                throw new Error(result.error?.message || 'Failed to mint ShapeXp NFT');
+            }
 
-            console.log('5. Calling ShapeXpNFT mint function');
-            const tx = await nftContract.mint({
-                gasLimit: gasLimit * BigInt(12) / BigInt(10) // Add 20% buffer
-            });
-            console.log('6. Mint transaction sent:', tx.hash);
-
-            console.log('7. Waiting for transaction confirmation...');
-            const receipt = await tx.wait(1);
-            console.log('8. Transaction confirmed:', receipt.hash);
+            console.log('2. Transaction confirmed:', result.tx?.hash);
 
             // Add delay to allow chain state to update
-            console.log('9. Waiting for chain state update...');
+            console.log('3. Waiting for chain state update...');
             await new Promise(resolve => setTimeout(resolve, 3000));
 
-            console.log('10. Checking ownership...');
+            console.log('4. Checking ownership...');
             await this.checkShapeXpOwnership();
 
-            console.log('11. Setting minted state...');
+            console.log('5. Setting minted state...');
             this.appState.updateMintButtonState(ButtonState.MINTED);
 
-            return tx;
         } catch (error: any) {
             console.error('Minting error:', {
                 message: error.message,
                 code: error.code,
                 data: error.data,
                 transaction: error.transaction,
-                // Add stack trace for debugging
                 stack: error.stack
             });
             this.appState.updateMintButtonState(ButtonState.DEFAULT);
