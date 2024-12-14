@@ -5,6 +5,9 @@ import { AddToInventoryResult, addToInventory } from '../features/nft/inventory-
 import { NFTExperienceResult, getNFTExperience, AddNFTExperienceResult, addNFTExperience } from '../features/nft/nft-experience';
 import { RemoveFromInventoryResult, removeFromInventory } from '../features/nft/inventory-removal';
 import { MintResult, mintShapeXpNFT } from '../features/nft/minting';
+import { ExperienceResult, addGlobalExperience  } from '../features/experience/experience-addition';
+import { ExperienceAmount } from '../contracts/abis';
+
 import { Contract } from 'ethers';
 
 export class ShapeXpHelpers {
@@ -131,6 +134,22 @@ export class ShapeXpHelpers {
             return await mintShapeXpNFT();
         } catch (error) {
             console.error('Error minting ShapeXp:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Add global experience points
+     * @param expType - Experience amount type (LOW, MID, HIGH)
+     * @returns Promise<ExperienceResult> Result of experience addition
+     */
+    public static async addGlobalExperience(
+        expType: ExperienceAmount
+    ): Promise<ExperienceResult> {
+        try {
+            return await addGlobalExperience(expType);
+        } catch (error) {
+            console.error('Error adding global experience:', error);
             throw error;
         }
     }

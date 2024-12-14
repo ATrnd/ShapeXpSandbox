@@ -1,11 +1,16 @@
 // src/features/nft/minting.ts
 import { getShapeXpNFTContract } from '../../contracts/contract-instances';
+import { parseMintError } from '../../utils/mint-error-decoder';
 import { ContractTransactionResponse } from 'ethers';
 
 export interface MintResult {
     success: boolean;
     tx?: ContractTransactionResponse;
-    error?: string;
+    error?: {
+        code: string;
+        message: string;
+        details?: any;
+    };
 }
 
 export async function mintShapeXpNFT(): Promise<MintResult> {
@@ -32,20 +37,22 @@ export async function mintShapeXpNFT(): Promise<MintResult> {
 
         return {
             success: true,
-            tx
+            tx: receipt.hash
         };
+
     } catch (error: any) {
-        console.error('Minting error:', {
-            message: error.message,
-            code: error.code,
-            data: error.data,
-            transaction: error.transaction,
-            stack: error.stack
-        });
+        const parsedError = parseMintError(error);
+
+        console.log('--- [shapeXp :: Minting error] ---', '\n-----------------------------------', {
+            code: parsedError.code,
+            message: parsedError.message,
+            details: parsedError.details,
+            originalError: error
+        }, '\n-----------------------------------');
 
         return {
             success: false,
-            error: error.message || 'Failed to mint ShapeXp NFT'
+            error: parsedError
         };
     }
 }

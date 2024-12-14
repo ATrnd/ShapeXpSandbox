@@ -9,7 +9,9 @@ import { ShapeXpHelpers } from '../utils/shapexp-helpers';
 import { getCurrentAddress } from '../utils/provider';
 import { NFTMetadata } from '../features/nft/nft-fetching';
 import { InventoryData } from '../features/nft/inventory';
+import { ExperienceAmount } from '../contracts/abis';
 import { ContractTransactionResponse } from 'ethers';
+
 
 /**
 * @title ShapeXp Sandbox Interface
@@ -56,6 +58,39 @@ export class ShapeXpSandbox {
                     return {
                         success: false as const,
                         error: error.message || 'Failed to mint ShapeXp NFT'
+                    };
+                }
+            },
+
+            /**
+             * Add global experience points
+             * @param type - Experience amount type ("LOW", "MID", "HIGH")
+             * @returns Promise with transaction result
+             * @example
+             * const result = await ShapeXpAPI.addGlobalExperience("LOW");
+             * if (result.success) {
+             *   console.log('Experience added:', result.transactionHash);
+             * }
+             */
+            addGlobalExperience: async (type: keyof typeof ExperienceAmount) => {
+                try {
+                    const expType = ExperienceAmount[type];
+                    const result = await ShapeXpHelpers.addGlobalExperience(expType);
+                    if (result.success) {
+                        return {
+                            success: true as const,
+                            ...(result.transactionHash && { transactionHash: result.transactionHash })
+                        };
+                    } else {
+                        return {
+                            success: false as const,
+                            error: result.error || 'Failed to add global experience'
+                        };
+                    }
+                } catch (error: any) {
+                    return {
+                        success: false as const,
+                        error: error.message || 'Failed to add global experience'
                     };
                 }
             },
@@ -378,6 +413,15 @@ declare global {
             mintShapeXp: () => Promise<{
                 success: true;
                 tx?: ContractTransactionResponse;
+            } | {
+                success: false;
+                error: string;
+            }>;
+            addGlobalExperience: (
+                type: keyof typeof ExperienceAmount
+            ) => Promise<{
+                success: true;
+                transactionHash?: string;
             } | {
                 success: false;
                 error: string;
