@@ -1,4 +1,5 @@
 import { getShapeXpContract, getShapeXpNFTContract } from '../contracts/contract-instances';
+import { NFTMetadata, fetchUserNFTs } from '../features/nft/nft-fetching';
 import { Contract } from 'ethers';
 
 export class ShapeXpHelpers {
@@ -84,6 +85,20 @@ export class ShapeXpHelpers {
             };
         } catch (error) {
             console.error('Error fetching ShapeXp data:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Fetch all NFTs owned by an address
+     * @param address - Ethereum address to check
+     * @returns Promise<NFTMetadata[]> Array of NFT data
+     */
+    public static async getNFTs(address: string): Promise<NFTMetadata[]> {
+        try {
+            return await fetchUserNFTs(address);
+        } catch (error) {
+            console.error('Error in getNFTs:', error);
             throw error;
         }
     }

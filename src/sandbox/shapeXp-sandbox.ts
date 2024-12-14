@@ -7,6 +7,8 @@
 
 import { ShapeXpHelpers } from '../utils/shapexp-helpers';
 import { getCurrentAddress } from '../utils/provider';
+import { NFTMetadata } from '../features/nft/nft-fetching';
+
 
 /**
 * @title ShapeXp Sandbox Interface
@@ -30,6 +32,25 @@ export class ShapeXpSandbox {
             getShapeXp: async () => {
                 const appState = (window as any).appState;
                 return appState.getFormattedExperience();
+            },
+
+            /**
+             * Get all NFTs for current address or specified address
+             */
+            getNFTs: async (address?: string) => {
+                try {
+                    const targetAddress = address || await getCurrentAddress();
+                    const nfts = await ShapeXpHelpers.getNFTs(targetAddress);
+                    return {
+                        success: true,
+                        nfts
+                    };
+                } catch (error) {
+                    return {
+                        success: false,
+                        error: 'Failed to fetch NFTs'
+                    };
+                }
             },
 
            /**
@@ -122,7 +143,8 @@ export class ShapeXpSandbox {
                         error: 'Failed to check NFT ownership'
                     };
                 }
-            }
+            },
+
         };
     }
 }
@@ -157,6 +179,13 @@ declare global {
             shapeXpLookupNFT: (address: string) => Promise<{
                 success: true;
                 hasNFT: boolean;
+            } | {
+                success: false;
+                error: string;
+            }>;
+            getNFTs: (address?: string) => Promise<{
+                success: true;
+                nfts: NFTMetadata[];
             } | {
                 success: false;
                 error: string;
