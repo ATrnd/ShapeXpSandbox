@@ -8,7 +8,7 @@
 import { ShapeXpHelpers } from '../utils/shapexp-helpers';
 import { getCurrentAddress } from '../utils/provider';
 import { NFTMetadata } from '../features/nft/nft-fetching';
-
+import { InventoryData } from '../features/nft/inventory';
 
 /**
 * @title ShapeXp Sandbox Interface
@@ -32,6 +32,25 @@ export class ShapeXpSandbox {
             getShapeXp: async () => {
                 const appState = (window as any).appState;
                 return appState.getFormattedExperience();
+            },
+
+            /**
+             * Get inventory for current address or specified address
+             */
+            getInventory: async (address?: string) => {
+                try {
+                    const targetAddress = address || await getCurrentAddress();
+                    const inventory = await ShapeXpHelpers.getInventory(targetAddress);
+                    return {
+                        success: true,
+                        inventory
+                    };
+                } catch (error) {
+                    return {
+                        success: false,
+                        error: 'Failed to fetch inventory'
+                    };
+                }
             },
 
             /**
@@ -186,6 +205,13 @@ declare global {
             getNFTs: (address?: string) => Promise<{
                 success: true;
                 nfts: NFTMetadata[];
+            } | {
+                success: false;
+                error: string;
+            }>;
+            getInventory: (address?: string) => Promise<{
+                success: true;
+                inventory: InventoryData;
             } | {
                 success: false;
                 error: string;

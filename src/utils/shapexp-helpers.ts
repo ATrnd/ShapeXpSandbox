@@ -1,5 +1,6 @@
 import { getShapeXpContract, getShapeXpNFTContract } from '../contracts/contract-instances';
 import { NFTMetadata, fetchUserNFTs } from '../features/nft/nft-fetching';
+import { InventorySlot, InventoryData, fetchInventory } from '../features/nft/inventory';
 import { Contract } from 'ethers';
 
 export class ShapeXpHelpers {
@@ -99,6 +100,20 @@ export class ShapeXpHelpers {
             return await fetchUserNFTs(address);
         } catch (error) {
             console.error('Error in getNFTs:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Get inventory data for an address
+     * @param address - Ethereum address to check
+     * @returns Promise<InventoryData> Inventory data including slots
+     */
+    public static async getInventory(address: string): Promise<InventoryData> {
+        try {
+            return await fetchInventory(address);
+        } catch (error) {
+            console.error('Error getting inventory:', error);
             throw error;
         }
     }
