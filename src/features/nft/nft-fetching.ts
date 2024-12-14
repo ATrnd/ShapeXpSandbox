@@ -60,7 +60,7 @@ export async function fetchUserNFTs(address: string): Promise<NFTMetadata[]> {
             }
 
             return {
-                name: nft.metadata?.name || nft.title || 'Unnamed NFT',
+                name: nft.metadata?.name || nft.title || 'ShapeXp NFT',
                 imageUrl,
                 contractAddress: nft.contract.address,
                 tokenId

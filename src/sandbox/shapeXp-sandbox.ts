@@ -36,6 +36,24 @@ export class ShapeXpSandbox {
             },
 
             /**
+             * Get experience points for a specific NFT
+             */
+            getNFTExperience: async (contractAddress: string, tokenId: string) => {
+                try {
+                    const result = await ShapeXpHelpers.getNFTExperience(contractAddress, tokenId);
+                    return {
+                        success: true,
+                        experience: result.experience
+                    };
+                } catch (error: any) {
+                    return {
+                        success: false,
+                        error: error.message || 'Failed to fetch NFT experience'
+                    };
+                }
+            },
+
+            /**
              * Add NFT to ShapeXp inventory
              */
             addNFTToInventory: async (contractAddress: string, tokenId: string) => {
@@ -248,6 +266,16 @@ declare global {
             ) => Promise<{
                 success: true;
                 tx?: ContractTransactionResponse;
+            } | {
+                success: false;
+                error: string;
+            }>;
+            getNFTExperience: (
+                contractAddress: string,
+                tokenId: string
+            ) => Promise<{
+                success: true;
+                experience: string;
             } | {
                 success: false;
                 error: string;

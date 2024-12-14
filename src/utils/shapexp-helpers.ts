@@ -2,6 +2,7 @@ import { getShapeXpContract, getShapeXpNFTContract } from '../contracts/contract
 import { NFTMetadata, fetchUserNFTs } from '../features/nft/nft-fetching';
 import { InventorySlot, InventoryData, fetchInventory } from '../features/nft/inventory';
 import { AddToInventoryResult, addToInventory } from '../features/nft/inventory-actions';
+import { NFTExperienceResult, getNFTExperience } from '../features/nft/nft-experience';
 import { Contract } from 'ethers';
 
 export class ShapeXpHelpers {
@@ -133,6 +134,24 @@ export class ShapeXpHelpers {
             return await addToInventory(contractAddress, tokenId);
         } catch (error) {
             console.error('Error adding NFT to inventory:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Get experience points for a specific NFT
+     * @param contractAddress - NFT contract address
+     * @param tokenId - NFT token ID
+     * @returns Promise<NFTExperienceResult> Experience data
+     */
+    public static async getNFTExperience(
+        contractAddress: string,
+        tokenId: string
+    ): Promise<NFTExperienceResult> {
+        try {
+            return await getNFTExperience(contractAddress, tokenId);
+        } catch (error) {
+            console.error('Error getting NFT experience:', error);
             throw error;
         }
     }
