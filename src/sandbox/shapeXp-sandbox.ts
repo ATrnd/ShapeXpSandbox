@@ -36,6 +36,56 @@ export class ShapeXpSandbox {
             },
 
             /**
+             * Remove NFT from ShapeXp inventory
+             */
+            removeNFTFromInventory: async (contractAddress: string, tokenId: string) => {
+                try {
+                    const result = await ShapeXpHelpers.removeNFTFromInventory(contractAddress, tokenId);
+                    if (result.success) {
+                        return {
+                            success: true as const,
+                            ...(result.tx && { tx: result.tx })
+                        };
+                    } else {
+                        return {
+                            success: false as const,
+                            error: result.error || 'Failed to remove NFT from inventory'
+                        };
+                    }
+                } catch (error: any) {
+                    return {
+                        success: false as const,
+                        error: error.message || 'Failed to remove NFT from inventory'
+                    };
+                }
+            },
+
+            /**
+             * Add experience points to a specific NFT
+             */
+            addNFTExperience: async (nftContract: string, tokenId: string) => {
+                try {
+                    const result = await ShapeXpHelpers.addNFTExperience(nftContract, tokenId);
+                    if (result.success) {
+                        return {
+                            success: true as const,
+                            ...(result.transactionHash && { transactionHash: result.transactionHash })
+                        };
+                    } else {
+                        return {
+                            success: false as const,
+                            error: result.error || 'Failed to add NFT experience'
+                        };
+                    }
+                } catch (error: any) {
+                    return {
+                        success: false as const,
+                        error: error.message || 'Failed to add NFT experience'
+                    };
+                }
+            },
+
+            /**
              * Get experience points for a specific NFT
              */
             getNFTExperience: async (contractAddress: string, tokenId: string) => {
@@ -276,6 +326,26 @@ declare global {
             ) => Promise<{
                 success: true;
                 experience: string;
+            } | {
+                success: false;
+                error: string;
+            }>;
+            addNFTExperience: (
+                nftContract: string,
+                tokenId: string
+            ) => Promise<{
+                success: true;
+                transactionHash?: string;
+            } | {
+                success: false;
+                error: string;
+            }>;
+            removeNFTFromInventory: (
+                contractAddress: string,
+                tokenId: string
+            ) => Promise<{
+                success: true;
+                tx?: ContractTransactionResponse;
             } | {
                 success: false;
                 error: string;

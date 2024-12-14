@@ -2,7 +2,8 @@ import { getShapeXpContract, getShapeXpNFTContract } from '../contracts/contract
 import { NFTMetadata, fetchUserNFTs } from '../features/nft/nft-fetching';
 import { InventorySlot, InventoryData, fetchInventory } from '../features/nft/inventory';
 import { AddToInventoryResult, addToInventory } from '../features/nft/inventory-actions';
-import { NFTExperienceResult, getNFTExperience } from '../features/nft/nft-experience';
+import { NFTExperienceResult, getNFTExperience, AddNFTExperienceResult, addNFTExperience } from '../features/nft/nft-experience';
+import { RemoveFromInventoryResult, removeFromInventory } from '../features/nft/inventory-removal.ts';
 import { Contract } from 'ethers';
 
 export class ShapeXpHelpers {
@@ -152,6 +153,42 @@ export class ShapeXpHelpers {
             return await getNFTExperience(contractAddress, tokenId);
         } catch (error) {
             console.error('Error getting NFT experience:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Add experience points to a specific NFT
+     * @param nftContract - NFT contract address
+     * @param tokenId - NFT token ID
+     * @returns Promise<AddNFTExperienceResult> Result of experience addition
+     */
+    public static async addNFTExperience(
+        nftContract: string,
+        tokenId: string
+    ): Promise<AddNFTExperienceResult> {
+        try {
+            return await addNFTExperience(nftContract, tokenId);
+        } catch (error) {
+            console.error('Error adding NFT experience:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Remove an NFT from ShapeXp inventory
+     * @param contractAddress - NFT contract address
+     * @param tokenId - NFT token ID
+     * @returns Promise<RemoveFromInventoryResult>
+     */
+    public static async removeNFTFromInventory(
+        contractAddress: string,
+        tokenId: string
+    ): Promise<RemoveFromInventoryResult> {
+        try {
+            return await removeFromInventory(contractAddress, tokenId);
+        } catch (error) {
+            console.error('Error removing NFT from inventory:', error);
             throw error;
         }
     }
