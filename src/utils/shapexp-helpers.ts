@@ -1,6 +1,7 @@
 import { getShapeXpContract, getShapeXpNFTContract } from '../contracts/contract-instances';
 import { NFTMetadata, fetchUserNFTs } from '../features/nft/nft-fetching';
 import { InventorySlot, InventoryData, fetchInventory } from '../features/nft/inventory';
+import { AddToInventoryResult, addToInventory } from '../features/nft/inventory-actions';
 import { Contract } from 'ethers';
 
 export class ShapeXpHelpers {
@@ -114,6 +115,24 @@ export class ShapeXpHelpers {
             return await fetchInventory(address);
         } catch (error) {
             console.error('Error getting inventory:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Add an NFT to ShapeXp inventory
+     * @param contractAddress - NFT contract address
+     * @param tokenId - NFT token ID
+     * @returns Promise<AddToInventoryResult>
+     */
+    public static async addNFTToInventory(
+        contractAddress: string,
+        tokenId: string
+    ): Promise<AddToInventoryResult> {
+        try {
+            return await addToInventory(contractAddress, tokenId);
+        } catch (error) {
+            console.error('Error adding NFT to inventory:', error);
             throw error;
         }
     }

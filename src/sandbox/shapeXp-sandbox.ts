@@ -9,6 +9,7 @@ import { ShapeXpHelpers } from '../utils/shapexp-helpers';
 import { getCurrentAddress } from '../utils/provider';
 import { NFTMetadata } from '../features/nft/nft-fetching';
 import { InventoryData } from '../features/nft/inventory';
+import { ContractTransactionResponse } from 'ethers';
 
 /**
 * @title ShapeXp Sandbox Interface
@@ -32,6 +33,31 @@ export class ShapeXpSandbox {
             getShapeXp: async () => {
                 const appState = (window as any).appState;
                 return appState.getFormattedExperience();
+            },
+
+            /**
+             * Add NFT to ShapeXp inventory
+             */
+            addNFTToInventory: async (contractAddress: string, tokenId: string) => {
+                try {
+                    const result = await ShapeXpHelpers.addNFTToInventory(contractAddress, tokenId);
+                    if (result.success) {
+                        return {
+                            success: true as const,
+                            ...(result.tx && { tx: result.tx })
+                        };
+                    } else {
+                        return {
+                            success: false as const,
+                            error: result.error || 'Failed to add NFT to inventory'
+                        };
+                    }
+                } catch (error: any) {
+                    return {
+                        success: false as const,
+                        error: error.message || 'Failed to add NFT to inventory'
+                    };
+                }
             },
 
             /**
@@ -212,6 +238,16 @@ declare global {
             getInventory: (address?: string) => Promise<{
                 success: true;
                 inventory: InventoryData;
+            } | {
+                success: false;
+                error: string;
+            }>;
+            addNFTToInventory: (
+                contractAddress: string,
+                tokenId: string
+            ) => Promise<{
+                success: true;
+                tx?: ContractTransactionResponse;
             } | {
                 success: false;
                 error: string;
