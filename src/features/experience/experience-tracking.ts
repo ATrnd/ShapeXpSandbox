@@ -33,19 +33,19 @@ import { getCurrentAddress } from '../../utils/provider';
  */
 export async function getGlobalExperience(): Promise<{ experience: bigint, formattedExperience: string }> {
     try {
-        console.log('--- Fetching global experience ---');
+        // console.log('--- Fetching global experience ---');
         const contract = await getShapeXpContract();
         const userAddress = await getCurrentAddress();
 
-        console.log('Contract address: ', contract.target);
-        console.log('User address: ', userAddress);
+        // console.log('Contract address: ', contract.target);
+        // console.log('User address: ', userAddress);
 
         if (typeof contract.getGlobalExperience !== 'function') {
             throw new Error('getGlobalExperience function not found in contract ABI');
         }
 
         const experience = await contract.getGlobalExperience(userAddress);
-        console.log('Raw experience value: ', experience.toString());
+        // console.log('Raw experience value: ', experience.toString());
 
         const formattedExperience = experience.toString();
 

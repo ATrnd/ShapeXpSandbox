@@ -36,6 +36,31 @@ export class ShapeXpSandbox {
             },
 
             /**
+             * Mint a new ShapeXp NFT
+             */
+            mintShapeXp: async () => {
+                try {
+                    const result = await ShapeXpHelpers.mintShapeXp();
+                    if (result.success) {
+                        return {
+                            success: true as const,
+                            ...(result.tx && { tx: result.tx })
+                        };
+                    } else {
+                        return {
+                            success: false as const,
+                            error: result.error || 'Failed to mint ShapeXp NFT'
+                        };
+                    }
+                } catch (error: any) {
+                    return {
+                        success: false as const,
+                        error: error.message || 'Failed to mint ShapeXp NFT'
+                    };
+                }
+            },
+
+            /**
              * Remove NFT from ShapeXp inventory
              */
             removeNFTFromInventory: async (contractAddress: string, tokenId: string) => {
@@ -344,6 +369,13 @@ declare global {
                 contractAddress: string,
                 tokenId: string
             ) => Promise<{
+                success: true;
+                tx?: ContractTransactionResponse;
+            } | {
+                success: false;
+                error: string;
+            }>;
+            mintShapeXp: () => Promise<{
                 success: true;
                 tx?: ContractTransactionResponse;
             } | {

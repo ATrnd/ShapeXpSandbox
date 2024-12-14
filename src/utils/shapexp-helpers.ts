@@ -3,7 +3,8 @@ import { NFTMetadata, fetchUserNFTs } from '../features/nft/nft-fetching';
 import { InventorySlot, InventoryData, fetchInventory } from '../features/nft/inventory';
 import { AddToInventoryResult, addToInventory } from '../features/nft/inventory-actions';
 import { NFTExperienceResult, getNFTExperience, AddNFTExperienceResult, addNFTExperience } from '../features/nft/nft-experience';
-import { RemoveFromInventoryResult, removeFromInventory } from '../features/nft/inventory-removal.ts';
+import { RemoveFromInventoryResult, removeFromInventory } from '../features/nft/inventory-removal';
+import { MintResult, mintShapeXpNFT } from '../features/nft/minting';
 import { Contract } from 'ethers';
 
 export class ShapeXpHelpers {
@@ -117,6 +118,19 @@ export class ShapeXpHelpers {
             return await fetchInventory(address);
         } catch (error) {
             console.error('Error getting inventory:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Mint a new ShapeXp NFT
+     * @returns Promise<MintResult> Result of minting operation
+     */
+    public static async mintShapeXp(): Promise<MintResult> {
+        try {
+            return await mintShapeXpNFT();
+        } catch (error) {
+            console.error('Error minting ShapeXp:', error);
             throw error;
         }
     }

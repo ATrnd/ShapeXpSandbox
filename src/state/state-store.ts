@@ -192,6 +192,7 @@ export class AppState {
 
         if (!isConnected) {
             this.hasNFT = false;
+            this.updateMintButtonState(ButtonState.DEFAULT);
             this.disableButtons();
             this.updateConnectButtonState(ButtonState.DEFAULT);
         } else if (isConnected && address) {

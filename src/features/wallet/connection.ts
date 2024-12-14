@@ -34,8 +34,8 @@ export class WalletConnection {
     * 4. Initialize UI handlers
     */
     constructor() {
-        console.log('Initializing WalletConnection');
-        console.log('-----------------------------');
+        // console.log('Initializing WalletConnection');
+        // console.log('-----------------------------');
         this.appState = AppState.getInstance();
         this.shapeXpManager = new ShapeXpManager();
         this.cooldownTimer = CooldownTimer.getInstance();
@@ -68,7 +68,7 @@ export class WalletConnection {
                 await this.shapeXpManager.checkShapeXpOwnership();
                 // console.log('Initial state restored: Connected with account', accounts[0]);
             } else {
-                console.log('No connected account found on load');
+                // console.log('No connected account found on load');
             }
         } catch (error) {
             console.error('Error checking initial state:', error);
