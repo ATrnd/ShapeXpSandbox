@@ -1,11 +1,16 @@
 // src/features/nft/inventory-removal.ts
 import { getShapeXpContract } from '../../contracts/contract-instances';
 import { ContractTransactionResponse } from 'ethers';
+import { parseInventoryError } from '../../utils/inventory-error-decoder';
 
 export interface RemoveFromInventoryResult {
     success: boolean;
-    error?: string;
     tx?: ContractTransactionResponse;
+    error?: {
+        code: string;
+        message: string;
+        details?: any;
+    };
 }
 
 export async function removeFromInventory(
@@ -24,10 +29,18 @@ export async function removeFromInventory(
             tx
         };
     } catch (error: any) {
-        console.log('Error removing NFT from inventory:', error);
+        const parsedError = parseInventoryError(error);
+
+        console.log('[shapeXp :: NFT removal error]', {
+            code: parsedError.code,
+            message: parsedError.message,
+            details: parsedError.details,
+            originalError: error
+        });
+
         return {
             success: false,
-            error: error.message || 'Failed to remove NFT from inventory'
+            error: parsedError
         };
     }
 }

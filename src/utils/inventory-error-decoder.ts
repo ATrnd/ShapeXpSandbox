@@ -42,46 +42,52 @@ export function parseInventoryError(error: any): InventoryErrorDetails {
                     switch(decodedError.name) {
                         case 'ShapeXpInvExp__InvalidERC721Contract':
                             return {
-                                code: InventoryErrorCodes.INVALID_CONTRACT,
-                                message: InventoryErrorMessages.InvalidERC721Contract
-                            };
+                            code: InventoryErrorCodes.INVALID_CONTRACT,
+                            message: InventoryErrorMessages.InvalidERC721Contract
+                        };
 
                         case 'ShapeXpInvExp__InventoryFull':
                             return {
-                                code: InventoryErrorCodes.INVENTORY_FULL,
-                                message: InventoryErrorMessages.InventoryFull
-                            };
+                            code: InventoryErrorCodes.INVENTORY_FULL,
+                            message: InventoryErrorMessages.InventoryFull
+                        };
 
                         case 'ShapeXpInvExp__NFTAlreadyInInventory':
                             return {
-                                code: InventoryErrorCodes.NFT_ALREADY_IN_INVENTORY,
-                                message: InventoryErrorMessages.NFTAlreadyInInventory
-                            };
+                            code: InventoryErrorCodes.NFT_ALREADY_IN_INVENTORY,
+                            message: InventoryErrorMessages.NFTAlreadyInInventory
+                        };
 
                         case 'ShapeXpInvExp__NFTNotInInventory':
                             return {
-                                code: InventoryErrorCodes.NFT_NOT_IN_INVENTORY,
-                                message: InventoryErrorMessages.NFTNotInInventory
-                            };
+                            code: InventoryErrorCodes.NFT_NOT_IN_INVENTORY,
+                            message: InventoryErrorMessages.NFTNotInInventory
+                        };
 
                         case 'ShapeXpInvExp__NotInInventory':
                             return {
-                                code: InventoryErrorCodes.NOT_IN_INVENTORY,
-                                message: InventoryErrorMessages.NotInInventory
-                            };
+                            code: InventoryErrorCodes.NOT_IN_INVENTORY,
+                            message: InventoryErrorMessages.NotInInventory
+                        };
 
                         case 'ShapeXpInvExp__NotNFTOwner':
                             return {
-                                code: InventoryErrorCodes.NOT_NFT_OWNER,
-                                message: InventoryErrorMessages.NotNFTOwner
-                            };
+                            code: InventoryErrorCodes.NOT_NFT_OWNER,
+                            message: InventoryErrorMessages.NotNFTOwner
+                        };
+
+                        case 'ShapeXpInvExp__NFTNotInInventory':
+                            return {
+                            code: InventoryErrorCodes.REMOVAL_NFT_NOT_FOUND,
+                            message: InventoryErrorMessages.RemovalNFTNotFound
+                        };
 
                         default:
                             return {
-                                code: InventoryErrorCodes.UNKNOWN,
-                                message: `Unknown inventory error: ${decodedError.name}`,
-                                details: decodedError
-                            };
+                            code: InventoryErrorCodes.UNKNOWN,
+                            message: `Unknown inventory error: ${decodedError.name}`,
+                            details: decodedError
+                        };
                     }
                 }
             } catch (decodeError) {

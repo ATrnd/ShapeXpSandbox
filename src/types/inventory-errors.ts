@@ -22,7 +22,10 @@ export const InventoryErrorCodes = {
     NOT_IN_INVENTORY: 'INV_ITEM_NOT_FOUND',
     NOT_NFT_OWNER: 'INV_NOT_OWNER',
     USER_REJECTED: 'INV_USER_REJECTED',
-    UNKNOWN: 'INV_UNKNOWN_ERROR'
+    UNKNOWN: 'INV_UNKNOWN_ERROR',
+    REMOVAL_NOT_SHAPEXP_OWNER: 'INV_REM_NOT_SHAPEXP_OWNER',
+    REMOVAL_NOT_NFT_OWNER: 'INV_REM_NOT_NFT_OWNER',
+    REMOVAL_NFT_NOT_FOUND: 'INV_REM_NFT_NOT_FOUND',
 } as const;
 
 export const InventoryErrorMessages = {
@@ -33,5 +36,8 @@ export const InventoryErrorMessages = {
     NotInInventory: "The requested item is not in inventory",
     NotNFTOwner: "You don't own this NFT",
     UserRejected: "Transaction was rejected by user",
-    Unknown: "An unknown inventory error occurred"
+    Unknown: "An unknown inventory error occurred",
+    RemovalNotShapeXpOwner: "ShapeXp NFT required to remove from inventory",
+    RemovalNotNFTOwner: "You don't own this NFT",
+    RemovalNFTNotFound: "NFT not found in inventory",
 } as const;
