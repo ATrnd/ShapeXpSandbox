@@ -176,7 +176,7 @@ export class AppState {
      */
     public updateNFTStatus(hasNFT: boolean) {
         this.hasNFT = hasNFT;
-        console.log('NFT status updated:', hasNFT);
+        // console.log('NFT status updated:', hasNFT);
         this.updateButtonsBasedOnNFT();
     }
 
@@ -195,7 +195,7 @@ export class AppState {
             this.disableButtons();
             this.updateConnectButtonState(ButtonState.DEFAULT);
         } else if (isConnected && address) {
-            console.log('connected');
+            // console.log('connected');
             this.updateConnectButtonState(ButtonState.COMPLETED);
             const mintButton = document.getElementById('ShapeXpSandboxMint');
             if (mintButton) {
@@ -221,10 +221,10 @@ export class AppState {
             expElement.textContent = `shapexp: ${formattedExperience}`;
         }
 
-        console.log('Experience updated:', {
-            raw: experience.toString(),
-            formatted: formattedExperience
-        });
+        // console.log('Experience updated:', {
+        //     raw: experience.toString(),
+        //     formatted: formattedExperience
+        // });
     }
 
     /**
@@ -240,7 +240,7 @@ export class AppState {
     private updateButtonsBasedOnNFT() {
         if (!this.isConnected) return;
 
-        console.log('Updating buttons based on NFT ownership:', this.hasNFT);
+        // console.log('Updating buttons based on NFT ownership:', this.hasNFT);
         const mintButton = document.getElementById('ShapeXpSandboxMint');
 
         if (this.hasNFT) {

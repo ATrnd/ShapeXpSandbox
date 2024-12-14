@@ -31,13 +31,13 @@ export async function checkShapeXpNFTOwnership(): Promise<boolean> {
         const nftContract = await getShapeXpNFTContract();
         const userAddress = await getCurrentAddress();
 
-        console.log('Checking NFT ownership for:', {
-            contract: nftContract.target,
-            user: userAddress
-        });
+        // console.log('Checking NFT ownership for:', {
+        //     contract: nftContract.target,
+        //     user: userAddress
+        // });
 
         const hasMinted = await nftContract.hasMintedToken(userAddress);
-        console.log('hasMintedToken result:', hasMinted);
+        // console.log('hasMintedToken result:', hasMinted);
         return hasMinted;
 
     } catch (error: any) {

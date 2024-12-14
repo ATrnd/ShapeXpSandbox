@@ -66,7 +66,7 @@ export class WalletConnection {
             if (accounts.length > 0) {
                 this.appState.updateConnection(true, accounts[0]);
                 await this.shapeXpManager.checkShapeXpOwnership();
-                console.log('Initial state restored: Connected with account', accounts[0]);
+                // console.log('Initial state restored: Connected with account', accounts[0]);
             } else {
                 console.log('No connected account found on load');
             }

@@ -150,15 +150,15 @@ export class ShapeXpManager {
     public async checkShapeXpOwnership() {
         try {
 
-            console.log('Checking ShapeXp ownership...');
+            // console.log('Checking ShapeXp ownership...');
             const hasNFT = await checkShapeXpNFTOwnership();
-            console.log('Has NFT:', hasNFT);
+            // console.log('Has NFT:', hasNFT);
             this.appState.updateNFTStatus(hasNFT);
 
             if (hasNFT) {
-                console.log('Fetching experience...');
+                // console.log('Fetching experience...');
                 const { experience, formattedExperience } = await getGlobalExperience();
-                console.log('Experience fetched:', formattedExperience);
+                // console.log('Experience fetched:', formattedExperience);
                 this.appState.updateExperience(experience, formattedExperience);
                 this.updateExperienceDisplay(formattedExperience);
             } else {
